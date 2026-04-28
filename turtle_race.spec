@@ -4,7 +4,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('lawn.gif', '.')],
+    datas=[('lawn.jpg', '.')],
     hiddenimports=['turtle'],
     hookspath=[],
     runtime_hooks=[],
