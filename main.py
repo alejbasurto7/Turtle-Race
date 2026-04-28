@@ -1,6 +1,13 @@
+import os
+import sys
 import random
 from turtle import Turtle, Screen
 from constants import *
+
+
+def resource_path(rel_path):
+    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, rel_path)
 
 
 def get_user_input():
@@ -100,7 +107,7 @@ def celebrate(winner):
 s = Screen()
 s.title("Turtle Race")
 s.setup(width=WINDOW_WIDTH, height=WINDOW_HEIGHT)
-s.bgpic("lawn.gif")
+s.bgpic(resource_path("lawn.gif"))
 
 turtles = create_turtles(TURTLE_COLORS)
 
