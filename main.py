@@ -1,16 +1,31 @@
 import os
 import sys
 import random
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 import tkinter
 import tkinter.messagebox
 from turtle import Turtle, Screen
 from PIL import Image, ImageTk
+import pygame
 from constants import *
 
 
 def resource_path(rel_path):
     base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base, rel_path)
+
+
+def start_background_music(midi_rel_path):
+    try:
+        pygame.mixer.init()
+        pygame.mixer.music.load(resource_path(midi_rel_path))
+        pygame.mixer.music.play(loops=-1)
+    except Exception as e:
+        print(f"Could not start background music: {e}")
 
 
 def get_user_input():
@@ -100,11 +115,19 @@ def set_turtles_start_line(turtles_list):
     starting_x = -(WINDOW_WIDTH / 2) + 20
     turtles_number = len(turtles_list)
     y_position = 50 + ((turtles_number * TURTLE_HEIGHT) + (SPACING * (turtles_number - 1)))/2
+    s.tracer(0)
     for tortuga in turtles_list:
+        tortuga['o'].hideturtle()
         tortuga['o'].color(tortuga['color'])
         tortuga['o'].penup()
         tortuga['o'].goto(x=starting_x, y=y_position)
+        tortuga['o'].showturtle()
         y_position -= SPACING
+    s.update()
+    s.tracer(1)
+
+
+CELEBRATION_Y = 180  # vertical offset so face/text aren't hidden by the centered "play again?" dialog
 
 
 def announce_result(winner, bet):
@@ -113,7 +136,7 @@ def announce_result(winner, bet):
         writer = Turtle()
         writer.hideturtle()
         writer.penup()
-        writer.goto(0, 0)
+        writer.goto(0, CELEBRATION_Y + 80)
         writer.color("gold")
         writer.write("YOU WIN!", align="center", font=("Arial", 72, "bold"))
     else:
@@ -121,7 +144,7 @@ def announce_result(winner, bet):
         writer = Turtle()
         writer.hideturtle()
         writer.penup()
-        writer.goto(0, 30)
+        writer.goto(0, CELEBRATION_Y + 80)
         writer.color("tomato")
         writer.write("SORRY, BRUH!", align="center", font=("Arial", 32, "bold"))
 
@@ -136,17 +159,18 @@ def celebrate(winner, won):
     winner.color(face_color)
 
     R = 60
+    cy = CELEBRATION_Y
 
     # Face outline
     winner.penup()
-    winner.goto(0, -R)
+    winner.goto(0, cy - R)
     winner.setheading(0)
     winner.pendown()
     winner.circle(R)
 
     # Left eye
     winner.penup()
-    winner.goto(-22, 14)
+    winner.goto(-22, cy + 14)
     winner.pendown()
     winner.begin_fill()
     winner.circle(5)
@@ -154,7 +178,7 @@ def celebrate(winner, won):
 
     # Right eye
     winner.penup()
-    winner.goto(14, 14)
+    winner.goto(14, cy + 14)
     winner.pendown()
     winner.begin_fill()
     winner.circle(5)
@@ -164,14 +188,12 @@ def celebrate(winner, won):
     winner.penup()
     winner.pensize(4)
     if won:
-        # Smile: start west of center (0,-20), face south → arc goes through bottom → arch down
-        winner.goto(-24, -20)
+        winner.goto(-24, cy - 20)
         winner.setheading(270)
         winner.pendown()
         winner.circle(24, 180)
     else:
-        # Frown: start east of center (0,-30), face north → arc goes through top → arch up
-        winner.goto(24, -30)
+        winner.goto(24, cy - 30)
         winner.setheading(90)
         winner.pendown()
         winner.circle(24, 180)
@@ -198,6 +220,8 @@ def set_background():
     item = canvas.create_image(-WINDOW_WIDTH // 2, -WINDOW_HEIGHT // 2, image=bg, anchor="nw")
     canvas.tag_lower(item)
     canvas._bg_photo = bg
+
+start_background_music("assets/TeenageMutantNinjaTurtles.mid")
 
 keep_playing = True
 first_run = True
@@ -244,4 +268,8 @@ while keep_playing:
 
     keep_playing = tkinter.messagebox.askyesno("Turtle Race", "Do you want to play again?")
 
+try:
+    pygame.mixer.music.stop()
+except Exception:
+    pass
 s.bye()
