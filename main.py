@@ -26,26 +26,45 @@ def get_user_input():
         text="Which turtle do you think will win the race?",
         font=("Arial", 12, "bold"),
         pady=12,
-    ).pack(padx=30)
+    ).grid(row=0, column=0, columnspan=2, padx=20, pady=(12, 8))
 
-    for i, name in enumerate(TURTLE_NAMES):
-        def make_cb(idx):
+    # 2x2 layout matching the position hints encoded in the asset filenames:
+    #   Leonardo (top-left)    Donatello (top-right)
+    #   Raphael (bottom-left)  Michaelangelo (bottom-right)
+    grid_layout = [
+        ("Leonardo", 1, 0),
+        ("Donatello", 1, 1),
+        ("Raphael", 2, 0),
+        ("Michaelangelo", 2, 1),
+    ]
+
+    # Hold PhotoImage references on the dialog so Tk doesn't garbage-collect them.
+    dialog._bet_images = []
+
+    for name, row, col in grid_layout:
+        idx = TURTLE_NAMES.index(name)  # 0-based; bet returned is idx + 1
+
+        img = Image.open(resource_path(TURTLE_IMAGES[name]))
+        img = img.resize((BET_IMAGE_SIZE, BET_IMAGE_SIZE), Image.LANCZOS)
+        photo = ImageTk.PhotoImage(img)
+        dialog._bet_images.append(photo)
+
+        def make_cb(bet_index):
             def cb():
-                selected[0] = idx + 1
+                selected[0] = bet_index
                 dialog.destroy()
             return cb
+
         tkinter.Button(
             dialog,
+            image=photo,
             text=name,
-            bg=TURTLE_COLORS[i],
-            fg="white",
+            compound="top",
             font=("Arial", 11, "bold"),
-            width=20,
-            pady=6,
-            command=make_cb(i),
-        ).pack(padx=30, pady=4)
-
-    tkinter.Frame(dialog, height=10).pack()
+            padx=8,
+            pady=8,
+            command=make_cb(idx + 1),
+        ).grid(row=row, column=col, padx=12, pady=8)
 
     # Center on screen
     dialog.update_idletasks()
