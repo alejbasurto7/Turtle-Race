@@ -14,6 +14,7 @@ SPACING = 30
 TURTLE_LENGTH = 40
 TURTLE_HEIGHT = 10
 MAX_PACE = 10
+TICK_DELAY = 0.01   # seconds between race ticks; tweak for race duration
 STARTING_Y = 100
 TURTLE_IMAGES = {
     "Raphael":      "assets/turtle_3_raphael_bottom_left.jpg",
@@ -22,3 +23,11 @@ TURTLE_IMAGES = {
     "Donatello":    "assets/turtle_2_donatello_top_right.jpg",
 }
 BET_IMAGE_SIZE = 140  # px, square — used by the bet dialog
+
+# Track layout
+N_LANES = 4
+TRACK_PADDING = 100       # px gap from screen edge to centerline rect
+LANE_SPACING = 24         # px between adjacent lane centers (> default turtle shape size)
+SPIRAL_STEP = 4 * LANE_SPACING  # px each spiral lap shrinks (keeps loops visually distinct)
+TRACK_PREVIEW_W = 220     # preview image width in track-selection dialog
+TRACK_PREVIEW_H = 140     # preview image height in track-selection dialog

@@ -1,275 +1,50 @@
-import os
 import sys
-import random
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
 except Exception:
     pass
-import tkinter
-import tkinter.messagebox
-from turtle import Turtle, Screen
-from PIL import Image, ImageTk
-import pygame
-from constants import *
+
+import audio
+import dialogs
+import race
+from constants import TURTLE_COLORS
 
 
-def resource_path(rel_path):
-    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base, rel_path)
+def main():
+    race.make_screen()
+    audio.start_background_music("assets/TeenageMutantNinjaTurtles.mid")
+    screen = race.get_screen()
+
+    keep_playing = True
+    first_run = True
+
+    while keep_playing:
+        if not first_run:
+            screen.clear()
+        first_run = False
+
+        race.set_background()
+        track_name = dialogs.get_user_track()
+        race.draw_boundary_stones(track_name)
+        turtles_list = race.create_turtles(TURTLE_COLORS)
+        race.place_turtles_on_track(turtles_list, track_name)
+        race.draw_start_line(track_name)
+        race.draw_finish_line(track_name)
+
+        user_bet = dialogs.get_user_bet()
+
+        winning_turtle = race.run_race(turtles_list, track_name, user_bet)
+
+        user_won = winning_turtle.pencolor() == turtles_list[user_bet - 1]['o'].pencolor()
+        race.celebrate(winning_turtle, user_won)
+        race.announce_result(winning_turtle, user_bet, turtles_list)
+
+        keep_playing = dialogs.ask_play_again()
+
+    audio.stop_background_music()
+    screen.bye()
 
 
-def start_background_music(midi_rel_path):
-    try:
-        pygame.mixer.init()
-        pygame.mixer.music.load(resource_path(midi_rel_path))
-        pygame.mixer.music.play(loops=-1)
-    except Exception as e:
-        print(f"Could not start background music: {e}")
-
-
-def get_user_input():
-    selected = [None]
-
-    dialog = tkinter.Toplevel()
-    dialog.title("Turtle Racing")
-    dialog.resizable(False, False)
-    dialog.protocol("WM_DELETE_WINDOW", lambda: None)  # force a choice
-
-    tkinter.Label(
-        dialog,
-        text="Which turtle do you think will win the race?",
-        font=("Arial", 12, "bold"),
-        pady=12,
-    ).grid(row=0, column=0, columnspan=2, padx=20, pady=(12, 8))
-
-    # 2x2 layout matching the position hints encoded in the asset filenames:
-    #   Leonardo (top-left)    Donatello (top-right)
-    #   Raphael (bottom-left)  Michaelangelo (bottom-right)
-    grid_layout = [
-        ("Leonardo", 1, 0),
-        ("Donatello", 1, 1),
-        ("Raphael", 2, 0),
-        ("Michaelangelo", 2, 1),
-    ]
-
-    # Hold PhotoImage references on the dialog so Tk doesn't garbage-collect them.
-    dialog._bet_images = []
-
-    for name, row, col in grid_layout:
-        idx = TURTLE_NAMES.index(name)  # 0-based; bet returned is idx + 1
-
-        img = Image.open(resource_path(TURTLE_IMAGES[name]))
-        img = img.resize((BET_IMAGE_SIZE, BET_IMAGE_SIZE), Image.LANCZOS)
-        photo = ImageTk.PhotoImage(img)
-        dialog._bet_images.append(photo)
-
-        def make_cb(bet_index):
-            def cb():
-                selected[0] = bet_index
-                dialog.destroy()
-            return cb
-
-        tkinter.Button(
-            dialog,
-            image=photo,
-            text=name,
-            compound="top",
-            font=("Arial", 11, "bold"),
-            padx=8,
-            pady=8,
-            command=make_cb(idx + 1),
-        ).grid(row=row, column=col, padx=12, pady=8)
-
-    # Center on screen
-    dialog.update_idletasks()
-    w, h = dialog.winfo_width(), dialog.winfo_height()
-    x = (dialog.winfo_screenwidth() - w) // 2
-    y = (dialog.winfo_screenheight() - h) // 2
-    dialog.geometry(f"+{x}+{y}")
-
-    dialog.grab_set()
-    dialog.wait_window()
-
-    return selected[0], False
-
-
-def draw_start_line():
-    start_line = Turtle()
-    start_line.hideturtle()
-    start_line.penup()
-    start_line.goto(-(WINDOW_WIDTH / 2) + TURTLE_LENGTH, WINDOW_HEIGHT / 2)
-    start_line.right(90)
-    start_line.pendown()
-    start_line.forward(WINDOW_HEIGHT)
-
-
-def create_turtles(color_list):
-    t = []
-    for turtle_color in color_list:
-        t.append({'color': turtle_color, 'o': Turtle(shape="turtle")})
-    return t
-
-
-def set_turtles_start_line(turtles_list):
-    starting_x = -(WINDOW_WIDTH / 2) + 20
-    turtles_number = len(turtles_list)
-    y_position = 50 + ((turtles_number * TURTLE_HEIGHT) + (SPACING * (turtles_number - 1)))/2
-    s.tracer(0)
-    for tortuga in turtles_list:
-        tortuga['o'].hideturtle()
-        tortuga['o'].color(tortuga['color'])
-        tortuga['o'].penup()
-        tortuga['o'].goto(x=starting_x, y=y_position)
-        tortuga['o'].showturtle()
-        y_position -= SPACING
-    s.update()
-    s.tracer(1)
-
-
-CELEBRATION_Y = 180  # vertical offset so face/text aren't hidden by the centered "play again?" dialog
-
-
-def announce_result(winner, bet):
-    if winner.pencolor() == turtles[bet - 1]['o'].pencolor():
-        print(f"You won! The {winner.pencolor()} 🐢 is the winner!")
-        writer = Turtle()
-        writer.hideturtle()
-        writer.penup()
-        writer.goto(0, CELEBRATION_Y + 80)
-        writer.color("gold")
-        writer.write("YOU WIN!", align="center", font=("Arial", 72, "bold"))
-    else:
-        print(f"You lose. The {winner.pencolor()} 🐢 is the winner.")
-        writer = Turtle()
-        writer.hideturtle()
-        writer.penup()
-        writer.goto(0, CELEBRATION_Y + 80)
-        writer.color("tomato")
-        writer.write("SORRY, BRUH!", align="center", font=("Arial", 32, "bold"))
-
-
-def celebrate(winner, won):
-    face_color = winner.pencolor()
-    winner.penup()
-    winner.home()
-    winner.hideturtle()
-    winner.speed("normal")
-    winner.pensize(3)
-    winner.color(face_color)
-
-    R = 60
-    cy = CELEBRATION_Y
-
-    # Face outline
-    winner.penup()
-    winner.goto(0, cy - R)
-    winner.setheading(0)
-    winner.pendown()
-    winner.circle(R)
-
-    # Left eye
-    winner.penup()
-    winner.goto(-22, cy + 14)
-    winner.pendown()
-    winner.begin_fill()
-    winner.circle(5)
-    winner.end_fill()
-
-    # Right eye
-    winner.penup()
-    winner.goto(14, cy + 14)
-    winner.pendown()
-    winner.begin_fill()
-    winner.circle(5)
-    winner.end_fill()
-
-    # Mouth
-    winner.penup()
-    winner.pensize(4)
-    if won:
-        winner.goto(-24, cy - 20)
-        winner.setheading(270)
-        winner.pendown()
-        winner.circle(24, 180)
-    else:
-        winner.goto(24, cy - 30)
-        winner.setheading(90)
-        winner.pendown()
-        winner.circle(24, 180)
-
-
-# Execution starts here
-s = Screen()
-s.title("Turtle Race")
-s.setup(width=1.0, height=1.0)
-WINDOW_WIDTH = s.window_width()
-WINDOW_HEIGHT = s.window_height()
-
-
-def set_background():
-    canvas = s.getcanvas()
-    img = Image.open(resource_path("lawn.jpg"))
-    scale = max(WINDOW_WIDTH / img.width, WINDOW_HEIGHT / img.height)
-    new_w, new_h = int(img.width * scale), int(img.height * scale)
-    img = img.resize((new_w, new_h), Image.LANCZOS)
-    left = (new_w - WINDOW_WIDTH) // 2
-    top = (new_h - WINDOW_HEIGHT) // 2
-    img = img.crop((left, top, left + WINDOW_WIDTH, top + WINDOW_HEIGHT))
-    bg = ImageTk.PhotoImage(img)
-    item = canvas.create_image(-WINDOW_WIDTH // 2, -WINDOW_HEIGHT // 2, image=bg, anchor="nw")
-    canvas.tag_lower(item)
-    canvas._bg_photo = bg
-
-start_background_music("assets/TeenageMutantNinjaTurtles.mid")
-
-keep_playing = True
-first_run = True
-
-while keep_playing:
-    if not first_run:
-        s.clear()
-    first_run = False
-
-    set_background()
-    turtles = create_turtles(TURTLE_COLORS)
-    set_turtles_start_line(turtles)
-
-    user_bet, cheat_mode = get_user_input()
-
-    # Start of race
-    first_place = False
-    is_race_on = True
-
-    while is_race_on:
-
-        for turtle in turtles:
-
-            # Cheat mode ###############################################################
-            #  Favoring this turtle...
-            if turtle['o'].pencolor() == turtles[user_bet - 1]['o'].pencolor() and cheat_mode:
-                random_distance = random.randint(2, MAX_PACE)
-            #   ...over the rest
-            else:
-                random_distance = random.randint(0, MAX_PACE)
-            # ##########################################################################
-
-            turtle['o'].forward(random_distance)
-
-            # If the turtle crosses the finish line
-            if turtle['o'].xcor() >= ((WINDOW_WIDTH - TURTLE_LENGTH) / 2) and not first_place:
-                winning_turtle = turtle['o']
-                first_place = True
-                is_race_on = False
-
-    user_won = winning_turtle.pencolor() == turtles[user_bet - 1]['o'].pencolor()
-    celebrate(winning_turtle, user_won)
-    announce_result(winning_turtle, user_bet)
-
-    keep_playing = tkinter.messagebox.askyesno("Turtle Race", "Do you want to play again?")
-
-try:
-    pygame.mixer.music.stop()
-except Exception:
-    pass
-s.bye()
+if __name__ == "__main__":
+    main()
