@@ -96,7 +96,7 @@ def test_species_shape_drawer_is_string_sentinel():
 def test_l_base_is_positive_float():
     assert isinstance(constants.L_BASE, float), "L_BASE must be a float"
     assert constants.L_BASE > 0, "L_BASE must be positive"
-    assert constants.L_BASE == 0.6, f"L_BASE must be 0.6, got {constants.L_BASE}"
+    assert constants.L_BASE == 1.2, f"L_BASE must be 1.2, got {constants.L_BASE}"
 
 
 def test_snake_stretch_wid_is_positive_float():

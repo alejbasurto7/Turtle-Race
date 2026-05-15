@@ -28,14 +28,14 @@ SPECIES_DIALOG_IMAGE_SIZE = 200  # px, square — used by the species-selection 
 # --- Snake racer identity ---
 SNAKE_NAMES   = ["Shadow", "Ralph", "Anaconda"]
 SNAKE_COLORS  = ["black", "#E89F4F", "green"]      # positional with SNAKE_NAMES; Ralph hex per CONTEXT-1.md
-SNAKE_LENGTHS = [6, 2, 5]                           # positional with SNAKE_NAMES; 6:5:2 ratio is Shadow:Anaconda:Ralph by value
+SNAKE_LENGTHS = [6, 2, 5]                           # positional with SNAKE_NAMES: Shadow=6, Ralph=2, Anaconda=5
 SNAKE_IMAGES  = {
     "Shadow":   "assets/snakes/Shadow.png",
     "Ralph":    "assets/snakes/Ralph.png",
     "Anaconda": "assets/snakes/Anaconda.png",
 }
-L_BASE = 0.6            # Phase 4 / CONTEXT-4 Decision 2: Shadow ≈ 36 units long (6*0.6*10),
-                        # fits the 300-unit-wide straight track; 6:5:2 ratio preserved.
+L_BASE = 1.2            # Phase 4 smoke-tuned (was 0.6 — too tiny on screen): Shadow ≈ 65 units
+                        # long (6*1.2*9 with snake polygon); 6:5:2 ratio preserved.
 SNAKE_STRETCH_WID = 0.5 # Phase 4 / CONTEXT-4 Decision 2: snake width ≈ 5 units at default
                         # classic shape; comfortably fits the 24-unit LANE_SPACING.
 

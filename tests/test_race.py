@@ -83,24 +83,24 @@ def test_head_offset_progress_ratio_greater_than_one():
 # ---------------------------------------------------------------------------
 
 def test_head_offset_arc_shadow():
-    """Shadow: L_BASE=0.6, length_units=6 → stretch_len=3.6.
-    head_offset_arc = 9 * 3.6 / 2 = 16.2 px along heading.
+    """Shadow: L_BASE=1.2, length_units=6 → stretch_len=7.2.
+    head_offset_arc = 9 * 7.2 / 2 = 32.4 px along heading.
     """
-    stretch_len = 0.6 * 6   # 3.6
+    stretch_len = 1.2 * 6   # 7.2
     head_offset_arc = SHAPE_UNIT_SIZE * stretch_len / 2
-    assert abs(head_offset_arc - 16.2) < 1e-9, (
-        f"Shadow head_offset_arc: expected 16.2, got {head_offset_arc}"
+    assert abs(head_offset_arc - 32.4) < 1e-9, (
+        f"Shadow head_offset_arc: expected 32.4, got {head_offset_arc}"
     )
 
 
 def test_head_offset_arc_ralph():
-    """Ralph: L_BASE=0.6, length_units=2 → stretch_len=1.2.
-    head_offset_arc = 9 * 1.2 / 2 = 5.4 px along heading.
+    """Ralph: L_BASE=1.2, length_units=2 → stretch_len=2.4.
+    head_offset_arc = 9 * 2.4 / 2 = 10.8 px along heading.
     """
-    stretch_len = 0.6 * 2   # 1.2
+    stretch_len = 1.2 * 2   # 2.4
     head_offset_arc = SHAPE_UNIT_SIZE * stretch_len / 2
-    assert abs(head_offset_arc - 5.4) < 1e-9, (
-        f"Ralph head_offset_arc: expected 5.4, got {head_offset_arc}"
+    assert abs(head_offset_arc - 10.8) < 1e-9, (
+        f"Ralph head_offset_arc: expected 10.8, got {head_offset_arc}"
     )
 
 # Note (no assertion): for turtles with stretch_len = 1.0 (default shapesize),
