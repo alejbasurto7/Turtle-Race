@@ -6,7 +6,7 @@ from turtle import Turtle, Screen
 from PIL import Image, ImageTk
 
 import tracks
-from constants import MAX_PACE, TICK_DELAY, TRACK_PADDING, TURTLE_NAMES
+from constants import MAX_PACE, TICK_DELAY, TRACK_PADDING, SPECIES
 from paths import resource_path
 
 
@@ -74,21 +74,21 @@ def _draw_segment(p0, p1):
     pen.penup()
 
 
-def draw_start_line(track_name):
+def draw_start_line(track_name, n):
     _screen.tracer(0)
-    for p0, p1 in tracks.start_line_segments(track_name):
+    for p0, p1 in tracks.start_line_segments(track_name, n):
         _draw_segment(p0, p1)
     _screen.update()
     _screen.tracer(1)
 
 
-def draw_boundary_stones(track_name):
+def draw_boundary_stones(track_name, n):
     _screen.tracer(0)
     pen = Turtle()
     pen.hideturtle()
     pen.penup()
     pen.color(STONE_COLOR)
-    for x, y in tracks.boundary_stones(track_name):
+    for x, y in tracks.boundary_stones(track_name, n):
         pen.goto(x, y)
         pen.dot(STONE_DIAMETER, STONE_COLOR)
     _screen.update()
@@ -124,38 +124,45 @@ def _draw_checkered_bar(p0, p1):
             )
 
 
-def draw_finish_line(track_name):
+def draw_finish_line(track_name, n):
     _screen.tracer(0)
-    for p0, p1 in tracks.finish_line_segments(track_name):
+    for p0, p1 in tracks.finish_line_segments(track_name, n):
         _draw_checkered_bar(p0, p1)
     _screen.update()
     _screen.tracer(1)
 
 
-def create_turtles(color_list):
-    t = []
-    for turtle_color in color_list:
-        t.append({'color': turtle_color, 'o': Turtle(shape="turtle")})
-    return t
+def create_racers(species: str):
+    """Create racer dicts for the given species.
+
+    Returns a list of {'name': ..., 'color': ..., 'o': Turtle(...)}.
+    # Shape dispatch (shape_drawer sentinel) is Phase 4's concern.
+    """
+    data = SPECIES[species]
+    racers = []
+    for name, color in zip(data["names"], data["colors"]):
+        racers.append({'name': name, 'color': color, 'o': Turtle(shape="turtle")})
+    return racers
 
 
-def place_turtles_on_track(turtles_list, track_name):
+def place_racers_on_track(racers, track_name):
+    n = len(racers)
     _screen.tracer(0)
-    for i, tortuga in enumerate(turtles_list):
-        x, y, heading = tracks.lane_start_pose(track_name, i)
-        tortuga['o'].hideturtle()
-        tortuga['o'].color(tortuga['color'])
-        tortuga['o'].penup()
-        tortuga['o'].setheading(heading)
-        tortuga['o'].goto(x, y)
-        tortuga['o'].showturtle()
+    for i, racer in enumerate(racers):
+        x, y, heading = tracks.lane_start_pose(track_name, i, n)
+        racer['o'].hideturtle()
+        racer['o'].color(racer['color'])
+        racer['o'].penup()
+        racer['o'].setheading(heading)
+        racer['o'].goto(x, y)
+        racer['o'].showturtle()
     _screen.update()
     _screen.tracer(1)
 
 
-def run_race(turtles_list, track_name, user_bet):
+def run_race(racers, track_name, user_bet):
     """Race loop. All lanes advance the same expected `s` per tick, then
-    each turtle's visual position is computed at `(s / shared_distance)`
+    each racer's visual position is computed at `(s / shared_distance)`
     of its own path length. This keeps the race fair regardless of which
     lane has the longer perimeter.
 
@@ -166,32 +173,33 @@ def run_race(turtles_list, track_name, user_bet):
     target fraction of the natural pace.
     """
     SPEED_FACTOR = 0.3                       # 30% of the naive pace; tweak to taste
-    lane_paths = tracks.build_lane_paths(track_name)
+    n = len(racers)
+    lane_paths = tracks.build_lane_paths(track_name, n)
     lane_lengths = [tracks.path_length(p) for p in lane_paths]
     straight_length = _screen.window_width() - 2 * TRACK_PADDING
     avg_lane_length = sum(lane_lengths) / len(lane_lengths)
     shared_distance = ((straight_length + avg_lane_length) / 2) / SPEED_FACTOR
-    progress = [0.0] * len(turtles_list)
+    progress = [0.0] * len(racers)
 
     print(f"\n=== Race start: {track_name} ===")
     print(f"  shared_distance (progress target, equal for all lanes): {shared_distance:.1f}")
     print(f"  {'lane':>4}  {'name':<14} {'color':<12} {'start (x, y)':<22} {'lane_length':>11}")
-    for i, turtle in enumerate(turtles_list):
+    for i, turtle in enumerate(racers):
         x0, y0 = lane_paths[i]["start"]
-        name = TURTLE_NAMES[i] if i < len(TURTLE_NAMES) else f"#{i}"
+        name = racers[i]['name']
         color = turtle['o'].pencolor()
         print(f"  {i:>4}  {name:<14} {color:<12} ({x0:>7.1f}, {y0:>7.1f})    {lane_lengths[i]:>11.1f}")
 
-    COAST_TICKS = 30                             # extra ticks turtles run past the finish line
+    COAST_TICKS = 30                             # extra ticks racers run past the finish line
     winning_turtle = None
     finish_order = []                            # lane indices in order of crossing the line
     ticks = 0
-    finish_ticks = [None] * len(turtles_list)    # tick number each lane finished on
-    coast_remaining = [None] * len(turtles_list) # ticks left in the post-finish coast phase
-    done = [False] * len(turtles_list)
+    finish_ticks = [None] * len(racers)          # tick number each lane finished on
+    coast_remaining = [None] * len(racers)       # ticks left in the post-finish coast phase
+    done = [False] * len(racers)
     _screen.tracer(0)
     while not all(done):
-        for i, turtle in enumerate(turtles_list):
+        for i, turtle in enumerate(racers):
             if done[i]:
                 continue
             step = random.randint(0, MAX_PACE)
@@ -225,7 +233,7 @@ def run_race(turtles_list, track_name, user_bet):
     print(f"  {'place':<5}  {'lane':>4}  {'name':<14} {'distance':>10}  {'lane_length':>11}  {'finish_tick':>11}")
     for place, lane_idx in enumerate(finish_order):
         distance = (progress[lane_idx] / shared_distance) * lane_lengths[lane_idx]
-        name = TURTLE_NAMES[lane_idx] if lane_idx < len(TURTLE_NAMES) else f"#{lane_idx}"
+        name = racers[lane_idx]['name']
         label = place_labels[place] if place < len(place_labels) else f"{place+1}th"
         print(f"  {label:<5}  {lane_idx:>4}  {name:<14} {distance:>10.1f}  {lane_lengths[lane_idx]:>11.1f}  {finish_ticks[lane_idx]:>11}")
     print()
@@ -233,10 +241,10 @@ def run_race(turtles_list, track_name, user_bet):
     return winning_turtle, finish_order
 
 
-def show_podium(turtles_list, finish_order):
-    """Stage the top-3 turtles on a 2-1-3 podium with gold/silver/bronze medals.
+def show_podium(racers, finish_order):
+    """Stage the top-3 racers on a 2-1-3 podium with gold/silver/bronze medals.
 
-    Hides all race turtles, then re-shows the top three at larger scale on
+    Hides all race racers, then re-shows the top three at larger scale on
     podium platforms. Drawn over the race scene so the existing background and
     finish-line graphics stay visible behind the podium blocks.
     """
@@ -244,8 +252,8 @@ def show_podium(turtles_list, finish_order):
         return
 
     _screen.tracer(0)
-    for tortuga in turtles_list:
-        tortuga['o'].hideturtle()
+    for racer in racers:
+        racer['o'].hideturtle()
 
     PODIUM_W = 110
     PODIUM_HEIGHTS = {1: 140, 2: 100, 3: 70}
@@ -286,7 +294,7 @@ def show_podium(turtles_list, finish_order):
         pen.goto(cx, PODIUM_BASE_Y + h / 2 - 24)
         pen.write(str(place), align="center", font=("Arial", 28, "bold"))
 
-    # Pass 2: place the winning turtles on top of the platforms, then *stamp*
+    # Pass 2: place the winning racers on top of the platforms, then *stamp*
     # them and hide the live turtle. The stamp is a static canvas item that
     # turtle.py never re-raises on subsequent updates — unlike the live turtle
     # sprite, which RawTurtle._drawturtle calls tag_raise on every update
@@ -295,7 +303,7 @@ def show_podium(turtles_list, finish_order):
         lane_idx = finish_order[place - 1]
         cx = PODIUM_X[place]
         top_y = PODIUM_BASE_Y + PODIUM_HEIGHTS[place]
-        turtle = turtles_list[lane_idx]['o']
+        turtle = racers[lane_idx]['o']
         turtle.setheading(90)
         turtle.shapesize(stretch_wid=3.0, stretch_len=3.0, outline=2)
         turtle.goto(cx, top_y + 30)
@@ -347,13 +355,13 @@ def show_podium(turtles_list, finish_order):
     _screen.tracer(1)
 
 
-def announce_result(winner, user_bet, turtles_list):
+def announce_result(winner, user_bet, racers):
     _screen.tracer(0)
-    if winner.pencolor() == turtles_list[user_bet - 1]['o'].pencolor():
-        print(f"You won! The {winner.pencolor()} 🐢 is the winner!")
+    if winner.pencolor() == racers[user_bet - 1]['o'].pencolor():
+        print(f"You won! The {winner.pencolor()} racer is the winner!")
         text, color, size = "YOU WIN!", "gold", 72
     else:
-        print(f"You lose. The {winner.pencolor()} 🐢 is the winner.")
+        print(f"You lose. The {winner.pencolor()} racer is the winner.")
         text, color, size = "SORRY, BRUH!", "tomato", 32
     writer = Turtle()
     writer.hideturtle()
