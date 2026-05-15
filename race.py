@@ -136,8 +136,8 @@ def create_racers(species: str):
     """Create racer dicts for the given species.
 
     Returns a list of {'name': ..., 'color': ..., 'o': Turtle(...)}.
-    # Shape dispatch (shape_drawer sentinel) is Phase 4's concern.
     """
+    # Shape dispatch (shape_drawer sentinel) is Phase 4's concern.
     data = SPECIES[species]
     racers = []
     for name, color in zip(data["names"], data["colors"]):

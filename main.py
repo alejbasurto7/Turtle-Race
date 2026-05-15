@@ -8,7 +8,6 @@ except Exception:
 import audio
 import dialogs
 import race
-from constants import TURTLE_COLORS
 
 
 def main():
@@ -26,20 +25,20 @@ def main():
 
         race.set_background()
         track_name = dialogs.get_user_track()
-        race.draw_boundary_stones(track_name)
-        turtles_list = race.create_turtles(TURTLE_COLORS)
-        race.place_turtles_on_track(turtles_list, track_name)
-        race.draw_start_line(track_name)
-        race.draw_finish_line(track_name)
+        racers = race.create_racers("turtles")
+        race.draw_boundary_stones(track_name, len(racers))
+        race.place_racers_on_track(racers, track_name)
+        race.draw_start_line(track_name, len(racers))
+        race.draw_finish_line(track_name, len(racers))
 
         user_bet = dialogs.get_user_bet()
 
-        winning_turtle, finish_order = race.run_race(turtles_list, track_name, user_bet)
+        winning_turtle, finish_order = race.run_race(racers, track_name, user_bet)
 
-        user_won = winning_turtle.pencolor() == turtles_list[user_bet - 1]['o'].pencolor()
-        race.show_podium(turtles_list, finish_order)
+        user_won = winning_turtle.pencolor() == racers[user_bet - 1]['o'].pencolor()
+        race.show_podium(racers, finish_order)
         race.celebrate(winning_turtle, user_won)
-        race.announce_result(winning_turtle, user_bet, turtles_list)
+        race.announce_result(winning_turtle, user_bet, racers)
 
         keep_playing = dialogs.ask_play_again()
 
