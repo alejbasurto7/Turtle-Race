@@ -4,6 +4,7 @@ import sys
 # Make project root importable when running pytest from any cwd.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import constants
 from constants import (
     TURTLE_NAMES, TURTLE_IMAGES, BET_IMAGE_SIZE, SPECIES_DIALOG_IMAGE_SIZE,
     SNAKE_NAMES, SNAKE_COLORS, SNAKE_LENGTHS, SNAKE_IMAGES, SPECIES,
@@ -90,3 +91,15 @@ def test_species_shape_drawer_is_string_sentinel():
         assert SPECIES[s]["shape_drawer"] in valid, (
             f"SPECIES['{s}']['shape_drawer'] must be one of {valid}"
         )
+
+
+def test_l_base_is_positive_float():
+    assert isinstance(constants.L_BASE, float), "L_BASE must be a float"
+    assert constants.L_BASE > 0, "L_BASE must be positive"
+    assert constants.L_BASE == 0.6, f"L_BASE must be 0.6, got {constants.L_BASE}"
+
+
+def test_snake_stretch_wid_is_positive_float():
+    assert isinstance(constants.SNAKE_STRETCH_WID, float), "SNAKE_STRETCH_WID must be a float"
+    assert constants.SNAKE_STRETCH_WID > 0, "SNAKE_STRETCH_WID must be positive"
+    assert constants.SNAKE_STRETCH_WID == 0.5, f"SNAKE_STRETCH_WID must be 0.5, got {constants.SNAKE_STRETCH_WID}"
