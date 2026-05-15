@@ -196,10 +196,13 @@ def run_race(racers, track_name, user_bet):
     print(f"\n=== Race start: {track_name} ===")
     print(f"  shared_distance (progress target, equal for all lanes): {shared_distance:.1f}")
     print(f"  {'lane':>4}  {'name':<14} {'color':<12} {'start (x, y)':<22} {'lane_length':>11}")
-    for i, turtle in enumerate(racers):
+    for i, racer in enumerate(racers):
         x0, y0 = lane_paths[i]["start"]
-        name = racers[i]['name']
-        color = turtle['o'].pencolor()
+        # Use the configured color string (e.g. "#E89F4F") rather than
+        # racer['o'].pencolor() — turtle module normalizes hex strings to
+        # (r, g, b) tuples on round-trip, which break the `{color:<12}` format spec.
+        name = racer['name']
+        color = racer['color']
         print(f"  {i:>4}  {name:<14} {color:<12} ({x0:>7.1f}, {y0:>7.1f})    {lane_lengths[i]:>11.1f}")
 
     COAST_TICKS = 30                             # extra ticks racers run past the finish line
