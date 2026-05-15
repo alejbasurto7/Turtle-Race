@@ -5,7 +5,7 @@ from turtle import Turtle, Screen
 from PIL import Image, ImageTk
 
 import tracks
-from constants import MAX_PACE, TICK_DELAY, TRACK_PADDING
+from constants import MAX_PACE, TICK_DELAY, TRACK_PADDING, TURTLE_NAMES
 from paths import resource_path
 
 
@@ -132,8 +132,19 @@ def run_race(turtles_list, track_name, user_bet):
     shared_distance = ((straight_length + avg_lane_length) / 2) / SPEED_FACTOR
     progress = [0.0] * len(turtles_list)
 
+    print(f"\n=== Race start: {track_name} ===")
+    print(f"  shared_distance (progress target, equal for all lanes): {shared_distance:.1f}")
+    print(f"  {'lane':>4}  {'name':<14} {'color':<12} {'start (x, y)':<22} {'lane_length':>11}")
+    for i, turtle in enumerate(turtles_list):
+        x0, y0 = lane_paths[i]["start"]
+        name = TURTLE_NAMES[i] if i < len(TURTLE_NAMES) else f"#{i}"
+        color = turtle['o'].pencolor()
+        print(f"  {i:>4}  {name:<14} {color:<12} ({x0:>7.1f}, {y0:>7.1f})    {lane_lengths[i]:>11.1f}")
+
     winning_turtle = None
+    winner_index = None
     first_place = False
+    ticks = 0
     _screen.tracer(0)
     while not first_place:
         for i, turtle in enumerate(turtles_list):
@@ -146,10 +157,23 @@ def run_race(turtles_list, track_name, user_bet):
             turtle['o'].goto(x, y)
             if progress[i] >= shared_distance and not first_place:
                 winning_turtle = turtle['o']
+                winner_index = i
                 first_place = True
+        ticks += 1
         _screen.update()
         time.sleep(TICK_DELAY)
     _screen.tracer(1)
+
+    print(f"--- Race end after {ticks} ticks ---")
+    print(f"  {'lane':>4}  {'name':<14} {'distance':>10}  {'lane_length':>11}  {'% done':>7}")
+    for i in range(len(turtles_list)):
+        fraction = progress[i] / shared_distance
+        distance = fraction * lane_lengths[i]
+        name = TURTLE_NAMES[i] if i < len(TURTLE_NAMES) else f"#{i}"
+        marker = "  <-- winner" if i == winner_index else ""
+        print(f"  {i:>4}  {name:<14} {distance:>10.1f}  {lane_lengths[i]:>11.1f}  {fraction*100:>6.1f}%{marker}")
+    print()
+
     return winning_turtle
 
 
