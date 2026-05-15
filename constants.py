@@ -24,6 +24,17 @@ TURTLE_IMAGES = {
 }
 BET_IMAGE_SIZE = 140  # px, square — used by the bet dialog
 
+# --- Snake racer identity ---
+SNAKE_NAMES   = ["Shadow", "Ralph", "Anaconda"]
+SNAKE_COLORS  = ["black", "#E89F4F", "green"]      # positional with SNAKE_NAMES; Ralph hex per CONTEXT-1.md
+SNAKE_LENGTHS = [6, 2, 5]                           # positional with SNAKE_NAMES; 6:5:2 ratio is Shadow:Anaconda:Ralph by value
+SNAKE_IMAGES  = {
+    "Shadow":   "assets/snakes/Shadow.png",
+    "Ralph":    "assets/snakes/Ralph.png",
+    "Anaconda": "assets/snakes/Anaconda.png",
+}
+L_BASE = 1.0   # placeholder — tuned visually in Phase 4
+
 # Track layout
 N_LANES = 4
 TRACK_PADDING = 100       # px gap from screen edge to centerline rect
