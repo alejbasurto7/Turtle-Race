@@ -61,3 +61,14 @@
 - Audit: CLEAN (pure refactor, no surface). Simplification: LOW_PRIORITY (pre-existing `_build_spiral_legs` shadow + `main.py` repeats `len(racers)` × 3 — both deferred to Phase 3/4). Documentation: MINOR_GAPS (`create_racers` docstring incomplete — fix when wiring snakes)
 - **Manual turtle-parity smoke: PASSED** — Alejandro confirmed 4-turtle race works correctly on all 3 tracks (straight, rectangular, spiral) with no visual regression
 - Ready for `/shipyard:plan 3`
+
+## 2026-05-15 — Phase 3 planned
+
+- CONTEXT-3.md locks 7 decisions: composite turtle/snake images for species dialog (2×2 + 1×3 grids via Pillow), no dialog helper extraction (3 parallel implementations), `get_user_bet(species)` internal if/elif dispatch on `bet_layout`, snake bet 1×3 row at `BET_IMAGE_SIZE`, `main.py` species-dialog insertion with opportunistic `n` hoist, snake-mode end-state uses turtle-shape placeholders (Phase 4 wires shapes), `SPECIES_DIALOG_IMAGE_SIZE = 200`
+- RESEARCH.md (565 lines): full `dialogs.py` map, refactor sketches, image-composition strategy, `main.py` change list, Tk image-retention gotchas, file-affected list
+- 2 plans (one per wave, sequential):
+  - PLAN-1.1: `constants.py` + `dialogs.py` foundation — `SPECIES_DIALOG_IMAGE_SIZE`, `get_user_bet(species)` refactor with `_TURTLE_GRID_LAYOUT` / `_SNAKE_ROW_LAYOUT` module-level constants
+  - PLAN-2.1: `get_user_species()` + `main.py` wire-up + opportunistic `n = len(racers)` hoist + opportunistic `create_racers` docstring fix
+- **PLAN-2.2 dropped during critique** — architect tried to formalize the post-build review pass as a "build" plan to force REVIEW disk writes. Redundant with the workflow's standard Step 4c reviewer dispatch. Its excellent review checklist will be embedded into the reviewer prompts I dispatch at build time.
+- Coverage verifier: PASS. Feasibility critique: READY with one CAUTION (image-composition JPG/RGBA mode mismatch — builder prompt must require `img.convert("RGBA")` before paste)
+- Ready for `/shipyard:build 3`
