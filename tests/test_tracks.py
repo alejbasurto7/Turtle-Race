@@ -1,3 +1,8 @@
+"""Tests for tracks.py geometry.
+
+Note: parametrize is used below for N=3/N=4 coverage; the existing single-track
+parametrize precedent is at lines 44, 333, 400, 409.
+"""
 import math
 import os
 import sys
@@ -418,3 +423,69 @@ def test_boundary_stones_count_matches_path_length(track):
     for path in _boundary_paths(track, N):
         expected_total += int(path_length(path) // spacing) + 1
     assert len(boundary_stones(track, N, spacing=spacing)) == expected_total
+
+
+# ---- parametrized N=3 / N=4 geometry tests ----
+
+
+@pytest.mark.parametrize("track,n", [
+    (STRAIGHT, 3), (STRAIGHT, 4),
+    (RECTANGULAR, 3), (RECTANGULAR, 4),
+    (SPIRAL, 3), (SPIRAL, 4),
+])
+def test_n_start_positions_are_distinct(track, n):
+    """N lanes produce N distinct (x, y) start positions."""
+    paths = build_lane_paths(track, n)
+    assert len(paths) == n
+    starts = [p["start"] for p in paths]
+    assert len(set(starts)) == n
+
+
+@pytest.mark.parametrize("track,n", [
+    (STRAIGHT, 3), (STRAIGHT, 4),
+    (RECTANGULAR, 3), (RECTANGULAR, 4),
+    (SPIRAL, 3), (SPIRAL, 4),
+])
+def test_n_start_positions_within_canvas_bounds(track, n):
+    """Every start position is within the canvas boundary."""
+    half_w, half_h = WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2
+    paths = build_lane_paths(track, n)
+    for p in paths:
+        x, y = p["start"]
+        assert -half_w <= x <= half_w, f"{track} n={n}: start x={x} out of bounds"
+        assert -half_h <= y <= half_h, f"{track} n={n}: start y={y} out of bounds"
+
+
+@pytest.mark.parametrize("n", [3, 4])
+def test_straight_lanes_n_spaced_by_lane_spacing(n):
+    """Straight-track lanes are exactly LANE_SPACING apart in Y."""
+    paths = build_lane_paths(STRAIGHT, n)
+    ys = sorted(p["start"][1] for p in paths)
+    assert len(ys) == n
+    diffs = [ys[i + 1] - ys[i] for i in range(n - 1)]
+    for d in diffs:
+        assert _approx(d, LANE_SPACING)
+
+
+@pytest.mark.parametrize("n", [3, 4])
+def test_spiral_n_lanes_all_end_at_origin(n):
+    """All spiral lanes terminate at approximately (0, 0) for N=3 and N=4."""
+    paths = build_lane_paths(SPIRAL, n)
+    for lane_idx, p in enumerate(paths):
+        x, y, _ = position_at_arc(p, path_length(p))
+        assert _approx(x, 0.0), f"spiral n={n} lane {lane_idx} x={x}"
+        assert _approx(y, 0.0), f"spiral n={n} lane {lane_idx} y={y}"
+
+
+@pytest.mark.parametrize("track,n,expected_count", [
+    (STRAIGHT, 3, 3),
+    (STRAIGHT, 4, 4),
+    (RECTANGULAR, 3, 1),
+    (RECTANGULAR, 4, 1),
+    (SPIRAL, 3, 1),
+    (SPIRAL, 4, 1),
+])
+def test_finish_line_segment_count(track, n, expected_count):
+    """finish_line_segments returns the expected number of bars for each (track, n)."""
+    bars = finish_line_segments(track, n)
+    assert len(bars) == expected_count
