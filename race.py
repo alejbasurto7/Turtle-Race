@@ -237,9 +237,40 @@ def run_race(racers, track_name, user_bet):
     shared_distance = ((straight_length + avg_lane_length) / 2) / SPEED_FACTOR
     progress = [0.0] * len(racers)
 
+    # Universal head-position finish detection (CONTEXT-4.md Decision 3).
+    # Both species use the same formula: the finish line is reached when the
+    # racer's HEAD crosses the goal, not its center.  Because turtles are
+    # symmetric (all four share the same stretch_len = 1.0), applying the
+    # same head-offset to all turtles leaves their relative race outcome
+    # unchanged — it only shifts all four finish at the same earlier threshold.
+    # Snakes get the real fairness benefit: longer snakes (Shadow) no longer
+    # gain extra progress because their center is still behind the line.
+    #
+    # Formula (RESEARCH.md §2 Approach B):
+    #   head_offset_arc      = shape_unit_size * stretch_len / 2
+    #   head_offset_progress = head_offset_arc * (shared_distance / lane_length)
+    #   finish condition     : progress[i] >= shared_distance - head_offset_progress[i]
+    #
+    # shape_unit_size = 9: the ``classic`` arrow polygon extends 9 units along
+    # the heading axis (RESEARCH.md §3).  Applied to turtles this is an
+    # approximation (the turtle polygon is smaller), but since it's applied
+    # uniformly the race outcome is symmetric — acceptable per CRITIQUE.md.
+    #
+    # Clamp stays at shared_distance (not the finish threshold) because
+    # coast_remaining[i] is set the moment the finish check fires, and the
+    # loop uses ``coast_remaining[i] is None`` to decide which branch to enter
+    # rather than comparing progress against shared_distance directly.
+    # This is simpler than lowering the clamp and avoids off-by-one edge cases.
+    _SHAPE_UNIT_SIZE = 9
+    head_offset_progress = []
+    for i in range(len(racers)):
+        stretch_len = racers[i]['o'].shapesize()[1]
+        head_offset_arc = _SHAPE_UNIT_SIZE * stretch_len / 2
+        head_offset_progress.append(head_offset_arc * (shared_distance / lane_lengths[i]))
+
     print(f"\n=== Race start: {track_name} ===")
     print(f"  shared_distance (progress target, equal for all lanes): {shared_distance:.1f}")
-    print(f"  {'lane':>4}  {'name':<14} {'color':<12} {'start (x, y)':<22} {'lane_length':>11}")
+    print(f"  {'lane':>4}  {'name':<14} {'color':<12} {'start (x, y)':<22} {'lane_length':>11}  {'head_off_prog':>13}")
     for i, racer in enumerate(racers):
         x0, y0 = lane_paths[i]["start"]
         # Use the configured color string (e.g. "#E89F4F") rather than
@@ -247,7 +278,7 @@ def run_race(racers, track_name, user_bet):
         # (r, g, b) tuples on round-trip, which break the `{color:<12}` format spec.
         name = racer['name']
         color = racer['color']
-        print(f"  {i:>4}  {name:<14} {color:<12} ({x0:>7.1f}, {y0:>7.1f})    {lane_lengths[i]:>11.1f}")
+        print(f"  {i:>4}  {name:<14} {color:<12} ({x0:>7.1f}, {y0:>7.1f})    {lane_lengths[i]:>11.1f}  {head_offset_progress[i]:>13.2f}")
 
     COAST_TICKS = 30                             # extra ticks racers run past the finish line
     winning_turtle = None
@@ -262,14 +293,21 @@ def run_race(racers, track_name, user_bet):
             if done[i]:
                 continue
             step = random.randint(0, MAX_PACE)
-            if progress[i] < shared_distance:
+            if coast_remaining[i] is None:
+                # Still racing — advance progress and check the head-position
+                # finish threshold.  Clamp at shared_distance so fraction stays
+                # in [0, 1]; the finish check uses the adjusted threshold below.
                 progress[i] = min(progress[i] + step, shared_distance)
                 fraction = progress[i] / shared_distance
                 arc = fraction * lane_lengths[i]
                 x, y, heading = tracks.position_at_arc(lane_paths[i], arc)
                 turtle['o'].setheading(heading)
                 turtle['o'].goto(x, y)
-                if progress[i] >= shared_distance:
+                # Head-position finish: the racer's head crosses the line when
+                # progress reaches shared_distance - head_offset_progress[i].
+                # For turtles this is ~4.5 progress units earlier than center;
+                # for Shadow (longest snake) it is ~16 units earlier.
+                if progress[i] >= shared_distance - head_offset_progress[i]:
                     finish_order.append(i)
                     finish_ticks[i] = ticks + 1
                     if winning_turtle is None:
