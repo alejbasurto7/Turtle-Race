@@ -28,48 +28,98 @@ _SNAKE_ROW_LAYOUT = [
 ]
 
 
-def get_user_bet():
+def get_user_bet(species):
+    """Show the species-appropriate bet dialog and return a 1-based racer index.
+
+    Args:
+        species: A key in constants.SPECIES — either "turtles" or "snakes".
+
+    Returns:
+        int: 1-based index into SPECIES[species]["names"] for the chosen racer.
+
+    Raises:
+        ValueError: If SPECIES[species]["bet_layout"] is an unrecognised value.
+    """
+    bet_layout = SPECIES[species]["bet_layout"]
+    species_names = SPECIES[species]["names"]
+    species_images = SPECIES[species]["images"]
+
     selected = [None]
 
     dialog = tkinter.Toplevel()
-    dialog.title("Turtle Racing")
     dialog.resizable(False, False)
     dialog.protocol("WM_DELETE_WINDOW", lambda: None)  # force a choice
 
-    tkinter.Label(
-        dialog,
-        text="Which turtle do you think will win the race?",
-        font=("Arial", 12, "bold"),
-        pady=12,
-    ).grid(row=0, column=0, columnspan=2, padx=20, pady=(12, 8))
-
     # Hold PhotoImage references on the dialog so Tk doesn't garbage-collect them.
+    # Initialised before the if/elif so both branches append to the same list.
     dialog._bet_images = []
 
-    for name, row, col in _TURTLE_GRID_LAYOUT:
-        idx = TURTLE_NAMES.index(name)  # 0-based; bet returned is idx + 1
+    def make_cb(bet_index):
+        def cb():
+            selected[0] = bet_index
+            dialog.destroy()
+        return cb
 
-        img = Image.open(resource_path(TURTLE_IMAGES[name]))
-        img = img.resize((BET_IMAGE_SIZE, BET_IMAGE_SIZE), Image.LANCZOS)
-        photo = ImageTk.PhotoImage(img)
-        dialog._bet_images.append(photo)
+    if bet_layout == "grid_2x2":
+        dialog.title("Turtle Racing")
 
-        def make_cb(bet_index):
-            def cb():
-                selected[0] = bet_index
-                dialog.destroy()
-            return cb
-
-        tkinter.Button(
+        tkinter.Label(
             dialog,
-            image=photo,
-            text=name,
-            compound="top",
-            font=("Arial", 11, "bold"),
-            padx=8,
-            pady=8,
-            command=make_cb(idx + 1),
-        ).grid(row=row, column=col, padx=12, pady=8)
+            text="Which turtle do you think will win the race?",
+            font=("Arial", 12, "bold"),
+            pady=12,
+        ).grid(row=0, column=0, columnspan=2, padx=20, pady=(12, 8))
+
+        for name, row, col in _TURTLE_GRID_LAYOUT:
+            idx = species_names.index(name)  # 0-based; bet returned is idx + 1
+
+            img = Image.open(resource_path(species_images[name]))
+            img = img.resize((BET_IMAGE_SIZE, BET_IMAGE_SIZE), Image.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            dialog._bet_images.append(photo)
+
+            tkinter.Button(
+                dialog,
+                image=photo,
+                text=name,
+                compound="top",
+                font=("Arial", 11, "bold"),
+                padx=8,
+                pady=8,
+                command=make_cb(idx + 1),
+            ).grid(row=row, column=col, padx=12, pady=8)
+
+    elif bet_layout == "row_3":
+        dialog.title("Snake Racing")
+
+        tkinter.Label(
+            dialog,
+            text="Which snake do you think will win the race?",
+            font=("Arial", 12, "bold"),
+            pady=12,
+        ).grid(row=0, column=0, columnspan=3, padx=20, pady=(12, 8))
+
+        for name, row, col in _SNAKE_ROW_LAYOUT:
+            idx = species_names.index(name)  # 0-based; bet returned is idx + 1
+
+            img = Image.open(resource_path(species_images[name]))
+            img = img.resize((BET_IMAGE_SIZE, BET_IMAGE_SIZE), Image.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            dialog._bet_images.append(photo)
+
+            tkinter.Button(
+                dialog,
+                image=photo,
+                text=name,
+                compound="top",
+                font=("Arial", 11, "bold"),
+                padx=8,
+                pady=8,
+                command=make_cb(idx + 1),
+            ).grid(row=row, column=col, padx=12, pady=8)
+
+    else:
+        raise ValueError(f"Unknown bet_layout: {bet_layout!r}")
 
     # Center on screen
     dialog.update_idletasks()
