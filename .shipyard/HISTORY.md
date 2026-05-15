@@ -74,3 +74,17 @@
 - Ready for `/shipyard:build 3`- [2026-05-15T21:10:04Z] Session ended during build (may need /shipyard:resume)
 - [2026-05-15T21:12:18Z] Session ended during build (may need /shipyard:resume)
 - [2026-05-15T21:15:10Z] Session ended during build (may need /shipyard:resume)
+
+## 2026-05-15 — Phase 3 built and verified
+
+- Two sequential waves, one plan each (architect's third plan PLAN-2.2 dropped during planning as redundant with workflow reviewer step)
+- Wave 1 PLAN-1.1: `SPECIES_DIALOG_IMAGE_SIZE` constant + `get_user_bet(species)` refactor with module-level layout constants. Verdict PASS, retries 0. Three atomic commits
+- Wave 2 PLAN-2.1: `get_user_species()` with Pillow composite images (RGBA mode handling correct), `main.py` wire-up, opportunistic `n = len(racers)` hoist + `create_racers` docstring fix (SIMPLIFICATION-2 + DOCUMENTATION-2 carry-overs cleared). Verdict PASS, retries 0. Three atomic commits
+- 6 build commits + 1 hotfix (`ded3720`, `b65bbc2`, `07e4183`, `c4f1271`, `75a62a2`, `9f56ace`, `be3e26a`)
+- **Smoke-found bug & hotfix (`be3e26a`):** race-start diagnostic log crashed on Ralph's `#E89F4F` because `turtle.pencolor()` returns `(r,g,b)` tuple for hex strings, which `{color:<12}` format spec can't render. PROJECT.md Open Items had flagged this exact risk for Phase 4 verify; surfaced earlier than expected. Fixed by reading `racer['color']` (the configured string) instead of round-tripping through `pencolor()`.
+- **CLAUDE.md updated** as part of Phase 3 wrap-up: rewrote "Turtle identity is positional" -> "Racer identity is positional, and species-dispatched"; added N-parameterized geometry section; updated Tk image-ref discipline (3 dialog lists); rewrote round-loop section; added hex pencolor caveat
+- `pytest`: 77/77 throughout
+- Audit: CLEAN. Simplification: LOW_PRIORITY (stale imports in dialogs.py, deferred to Phase 4). Documentation: MINOR_GAPS (`get_user_species()` docstring remaining)
+- **Manual species-smoke: PASSED** — Alejandro confirmed both Turtles and Snakes reach podium after hotfix
+- Untracked at end of phase: `assets/midi/` (9 .mid files Alejandro added; not part of Phase 3 scope)
+- Ready for `/shipyard:plan 4`
