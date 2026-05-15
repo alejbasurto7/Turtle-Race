@@ -416,11 +416,15 @@ def show_podium(racers, finish_order):
 
 def announce_result(winner, user_bet, racers):
     _screen.tracer(0)
-    if winner.pencolor() == racers[user_bet - 1]['o'].pencolor():
-        print(f"You won! The {winner.pencolor()} racer is the winner!")
+    winner_racer = next(r for r in racers if r['o'] is winner)
+    won = winner_racer['o'] is racers[user_bet - 1]['o']
+    color_display = winner_racer['color']   # configured string (e.g. "#E89F4F"), never a float tuple
+    name = winner_racer['name']
+    if won:
+        print(f"You won! {name} ({color_display}) is the winner!")
         text, color, size = "YOU WIN!", "gold", 72
     else:
-        print(f"You lose. The {winner.pencolor()} racer is the winner.")
+        print(f"You lose. {name} ({color_display}) is the winner.")
         text, color, size = "SORRY, BRUH!", "tomato", 32
     writer = Turtle()
     writer.hideturtle()
@@ -433,9 +437,10 @@ def announce_result(winner, user_bet, racers):
     _screen.tracer(1)
 
 
-def celebrate(winner, won):
+def celebrate(winner, won, racers):
     _screen.tracer(0)
-    face_color = winner.pencolor()
+    winner_racer = next(r for r in racers if r['o'] is winner)
+    face_color = winner_racer['color']   # configured string — turtle.color() accepts hex strings equally
     pen = Turtle()
     pen.hideturtle()
     pen.penup()
