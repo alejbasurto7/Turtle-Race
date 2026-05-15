@@ -35,6 +35,24 @@ SNAKE_IMAGES  = {
 }
 L_BASE = 1.0   # placeholder — tuned visually in Phase 4
 
+# --- Species config ---
+SPECIES = {
+    "turtles": {
+        "names":        TURTLE_NAMES,
+        "colors":       TURTLE_COLORS,
+        "images":       TURTLE_IMAGES,
+        "bet_layout":   "grid_2x2",
+        "shape_drawer": "turtle",
+    },
+    "snakes": {
+        "names":        SNAKE_NAMES,
+        "colors":       SNAKE_COLORS,
+        "images":       SNAKE_IMAGES,
+        "bet_layout":   "row_3",
+        "shape_drawer": "snake",
+    },
+}
+
 # Track layout
 N_LANES = 4
 TRACK_PADDING = 100       # px gap from screen edge to centerline rect
