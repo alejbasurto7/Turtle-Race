@@ -18,3 +18,11 @@
 - Design refined via Socratic dialogue (asset strategy, lane layout, code generalization, in-race shape, round flow)
 - PROJECT.md captures full spec; ROADMAP.md has 5 dependency-ordered phases
 - Phase 1 ready to plan
+
+## 2026-05-15 — Phase 1 planned
+
+- CONTEXT-1.md locks 3 decisions: string-sentinel `shape_drawer`, Ralph hex `#E89F4F`, commit snake PNGs in Phase 1
+- RESEARCH.md captures `constants.py` insertion point, spec syntax pattern, test style conventions, 7 gotchas
+- 3 plans written: PLAN-1.1 (TDD red — 9 new tests), PLAN-2.1 (constants + SPECIES, parallel), PLAN-2.2 (spec edit + git-add PNGs, parallel)
+- Coverage verifier: PASS. Feasibility critique: READY.
+- Ready for `/shipyard:build 1`
