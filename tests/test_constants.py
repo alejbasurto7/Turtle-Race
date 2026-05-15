@@ -4,7 +4,10 @@ import sys
 # Make project root importable when running pytest from any cwd.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from constants import TURTLE_NAMES, TURTLE_IMAGES, BET_IMAGE_SIZE, SNAKE_NAMES, SNAKE_COLORS, SNAKE_LENGTHS, SNAKE_IMAGES, SPECIES
+from constants import (
+    TURTLE_NAMES, TURTLE_IMAGES, BET_IMAGE_SIZE, SPECIES_DIALOG_IMAGE_SIZE,
+    SNAKE_NAMES, SNAKE_COLORS, SNAKE_LENGTHS, SNAKE_IMAGES, SPECIES,
+)
 
 
 def test_image_map_has_entry_for_every_turtle_name():
@@ -23,6 +26,12 @@ def test_image_files_exist_on_disk():
 def test_bet_image_size_is_positive_int():
     assert isinstance(BET_IMAGE_SIZE, int)
     assert BET_IMAGE_SIZE > 0
+
+
+def test_species_dialog_image_size_is_positive_int():
+    assert isinstance(SPECIES_DIALOG_IMAGE_SIZE, int)
+    assert SPECIES_DIALOG_IMAGE_SIZE > 0
+    assert SPECIES_DIALOG_IMAGE_SIZE >= BET_IMAGE_SIZE
 
 
 def test_snake_lists_are_length_3():

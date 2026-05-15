@@ -22,7 +22,8 @@ TURTLE_IMAGES = {
     "Leonardo":     "assets/turtle_1_leonardo_top_left.jpg",
     "Donatello":    "assets/turtle_2_donatello_top_right.jpg",
 }
-BET_IMAGE_SIZE = 140  # px, square — used by the bet dialog
+BET_IMAGE_SIZE = 140             # px, square — used by the bet dialog
+SPECIES_DIALOG_IMAGE_SIZE = 200  # px, square — used by the species-selection dialog (composite images)
 
 # --- Snake racer identity ---
 SNAKE_NAMES   = ["Shadow", "Ralph", "Anaconda"]
