@@ -4,8 +4,28 @@ import tkinter.messagebox
 from PIL import Image, ImageTk
 
 import tracks
-from constants import TURTLE_NAMES, TURTLE_IMAGES, BET_IMAGE_SIZE
+from constants import (
+    TURTLE_NAMES, TURTLE_IMAGES, BET_IMAGE_SIZE,
+    SNAKE_IMAGES, SPECIES, SPECIES_DIALOG_IMAGE_SIZE,
+)
 from paths import resource_path
+
+# 2×2 grid: positional order matches asset filename position hints.
+#   Leonardo (top-left)    Donatello (top-right)
+#   Raphael  (bottom-left) Michaelangelo (bottom-right)
+_TURTLE_GRID_LAYOUT = [
+    ("Leonardo",      1, 0),
+    ("Donatello",     1, 1),
+    ("Raphael",       2, 0),
+    ("Michaelangelo", 2, 1),
+]
+
+# 1×3 row: SNAKE_NAMES order (Shadow | Ralph | Anaconda).
+_SNAKE_ROW_LAYOUT = [
+    ("Shadow",   1, 0),
+    ("Ralph",    1, 1),
+    ("Anaconda", 1, 2),
+]
 
 
 def get_user_bet():
@@ -23,20 +43,10 @@ def get_user_bet():
         pady=12,
     ).grid(row=0, column=0, columnspan=2, padx=20, pady=(12, 8))
 
-    # 2x2 layout matching the position hints encoded in the asset filenames:
-    #   Leonardo (top-left)    Donatello (top-right)
-    #   Raphael (bottom-left)  Michaelangelo (bottom-right)
-    grid_layout = [
-        ("Leonardo", 1, 0),
-        ("Donatello", 1, 1),
-        ("Raphael", 2, 0),
-        ("Michaelangelo", 2, 1),
-    ]
-
     # Hold PhotoImage references on the dialog so Tk doesn't garbage-collect them.
     dialog._bet_images = []
 
-    for name, row, col in grid_layout:
+    for name, row, col in _TURTLE_GRID_LAYOUT:
         idx = TURTLE_NAMES.index(name)  # 0-based; bet returned is idx + 1
 
         img = Image.open(resource_path(TURTLE_IMAGES[name]))
