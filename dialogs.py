@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 
 import tracks
 from constants import (
-    TURTLE_NAMES, TURTLE_IMAGES, BET_IMAGE_SIZE,
+    BET_IMAGE_SIZE,
     SNAKE_IMAGES, SPECIES, SPECIES_DIALOG_IMAGE_SIZE,
 )
 from paths import resource_path
@@ -192,10 +192,14 @@ def get_user_track():
 
 
 def get_user_species():
-    """Show a modal dialog with composite species images and return the chosen species.
+    """Modal dialog: ask the user to pick between Turtles and Snakes.
+
+    Blocks (via grab_set() + wait_window()) until the user clicks one of the
+    two species buttons. The WM_DELETE_WINDOW handler is a no-op, so the
+    dialog cannot be dismissed without making a choice.
 
     Returns:
-        str: ``"turtles"`` or ``"snakes"`` — a key in ``constants.SPECIES``.
+        str: ``"turtles"`` or ``"snakes"`` — keys into ``constants.SPECIES``.
     """
     selected = [None]
 
