@@ -88,3 +88,15 @@
 - **Manual species-smoke: PASSED** — Alejandro confirmed both Turtles and Snakes reach podium after hotfix
 - Untracked at end of phase: `assets/midi/` (9 .mid files Alejandro added; not part of Phase 3 scope)
 - Ready for `/shipyard:plan 4`
+
+## 2026-05-15 — Phase 4 planned
+
+- CONTEXT-4.md locks 7 decisions: stretched `classic` shape first (polygon fallback on smoke), L_BASE=0.6, SNAKE_STRETCH_WID=0.5 (computed from lane spacing math), universal head-position finish detection (turtles too — symmetric), SHAPE_DRAWERS dispatch in race.py, cleanup scope = ALL 4 carry-forwards (dialogs.py imports, get_user_species docstring, race.py win-message fix, tracks.py _build_spiral_legs n shadow), spiral 3-lane geometry still deferred to Phase 5
+- RESEARCH.md (extensive): classic polygon dimensions (10x9 at shapesize 1,1), run_race finish-check mechanism, head-offset progress-based approach, draw_turtle_shape extraction, _SHAPE_DRAWERS placement, win-message refactor strategy, 8 gotchas
+- Researcher stalled mid-task — RESEARCH.md written inline from orchestrator analysis + researcher's partial findings
+- 4 plans across 3 waves (architect collapsed Wave 2 from 2 plans to 1 — both touched race.py):
+  - Wave 1 parallel: PLAN-1.1 (constants tune + tests) + PLAN-1.2 (dialogs.py imports + get_user_species docstring + tracks.py n rename)
+  - Wave 2 sequential: PLAN-2.1 (race.py shape dispatch + win-check refactor across announce_result/celebrate/main.py)
+  - Wave 3 sequential: PLAN-3.1 (universal head-offset progress adjustment + tests/test_race.py + manual smoke gate)
+- Coverage verifier: PASS. Critique verifier stalled mid-task — CRITIQUE.md written inline. Verdict: READY with one minor caveat (shape_unit_size=9 hardcoded — calibrated for classic/snakes, approximated for turtle but symmetric race outcome means no behavior regression)
+- Ready for `/shipyard:build 4`
