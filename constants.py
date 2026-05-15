@@ -54,7 +54,6 @@ SPECIES = {
 }
 
 # Track layout
-N_LANES = 4
 TRACK_PADDING = 100       # px gap from screen edge to centerline rect
 LANE_SPACING = 24         # px between adjacent lane centers (> default turtle shape size)
 SPIRAL_STEP = 4 * LANE_SPACING  # px each spiral lap shrinks (keeps loops visually distinct)
