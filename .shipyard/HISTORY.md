@@ -35,3 +35,16 @@
 - Audit: CLEAN. Simplification: LOW_PRIORITY (project_root duplication in tests, defer). Documentation: MINOR_GAPS (SNAKE_LENGTHS comment readability + CLAUDE.md deferral)
 - **Cosmetic issue:** commit `2681e4b` (Plan 2.1) bundled the snake PNGs alongside `constants.py` — was supposed to be Plan 2.2's commit. Cause: broad `git add`. End state correct; no remediation. Phase 2+ dispatches should remind builders to use file-specific `git add`.
 - Ready for `/shipyard:plan 2`
+
+## 2026-05-15 — Phase 2 planned
+
+- Discovered Phase 2 is larger than ROADMAP anticipated: `tracks.py` (395 lines, 14 N_LANES references) carries the bulk of the geometry that needs N-parameterization, not just `race.py`
+- CONTEXT-2.md locks 7 decisions: hard refactor `tracks.py` with explicit `n`, delete `N_LANES`, extend `test_tracks.py` in-place for N=3, rename `tortuga`→`racer`, identifier renames per ROADMAP, zero-regression turtle parity gate, add `name` field to racer dicts
+- RESEARCH.md (594 lines) maps every `N_LANES` reference, every `race.py` rename target, `main.py` call sites, `test_tracks.py` impact, `run_race`'s `shared_distance` analysis, geometry test design
+- 3 plans (one per wave, sequential):
+  - PLAN-1.1: `tracks.py` hard refactor + delete `N_LANES` + tests pass `n=4`
+  - PLAN-2.1: N=3 geometry tests + `race.py` rename + `create_racers` reads SPECIES
+  - PLAN-3.1: `main.py` wire-up + turtle-parity smoke
+- Coverage verifier: PASS. Feasibility critique: READY.
+- Builder prompts will explicitly require SUMMARY-W.P.md disk writes + file-specific `git add` (Phase 1 lessons learned)
+- Ready for `/shipyard:build 2`
