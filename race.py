@@ -6,7 +6,7 @@ from turtle import Turtle, Screen
 from PIL import Image, ImageTk
 
 import tracks
-from constants import MAX_PACE, TICK_DELAY, TRACK_PADDING, SPECIES
+from constants import MAX_PACE, TICK_DELAY, TRACK_PADDING, SPECIES, L_BASE, SNAKE_STRETCH_WID, SNAKE_LENGTHS
 from paths import resource_path
 
 
@@ -132,6 +132,45 @@ def draw_finish_line(track_name, n):
     _screen.tracer(1)
 
 
+def draw_turtle_shape(t):
+    """Apply the turtle shape to a Turtle object.
+
+    Color is intentionally not applied here; it is set later in
+    place_racers_on_track so both species follow the same placement path.
+    """
+    t.shape("turtle")
+
+
+def draw_snake_shape(t, length_units):
+    """Apply a stretched classic-arrow shape to represent a snake racer.
+
+    Uses the ``classic`` arrow shape scaled to:
+    - ``stretch_wid = SNAKE_STRETCH_WID`` (body thickness, < 1 keeps it slim)
+    - ``stretch_len = L_BASE * length_units`` (body length proportional to each
+      snake's length config in SNAKE_LENGTHS)
+
+    Produces visually distinct lengths: Shadow (6 units) > Anaconda (5) > Ralph
+    (2), all at a 6:5:2 ratio. At L_BASE=0.6 and the classic shape's ~9-unit
+    native length axis, Shadow's body is ~32 px along the heading direction.
+
+    # PHASE-4-PLACEHOLDER: if the stretched-classic shape doesn't read as a
+    # snake at race scale during manual smoke, escalate by registering a 2-segment
+    # polygon silhouette via screen.register_shape("snake_<name>", polygon).
+    # register_shape persists across screen.clear() — register once at startup,
+    # not in the round loop. See CONTEXT-4.md Decision 1.
+    """
+    t.shape("classic")
+    t.shapesize(stretch_wid=SNAKE_STRETCH_WID, stretch_len=L_BASE * length_units)
+
+
+# Resolves the string sentinel in SPECIES[species]["shape_drawer"] to a
+# callable. Keyed by the same string values used in constants.SPECIES.
+_SHAPE_DRAWERS = {
+    "turtle": draw_turtle_shape,
+    "snake":  draw_snake_shape,
+}
+
+
 def create_racers(species: str):
     """Create the field of racers for the given species.
 
@@ -149,11 +188,16 @@ def create_racers(species: str):
           ``SPECIES[species]["colors"][i]``).
         - ``'o'``:     turtle.Turtle — the underlying turtle object.
     """
-    # Shape dispatch (shape_drawer sentinel) is Phase 4's concern.
     data = SPECIES[species]
+    drawer = _SHAPE_DRAWERS[data["shape_drawer"]]
     racers = []
-    for name, color in zip(data["names"], data["colors"]):
-        racers.append({'name': name, 'color': color, 'o': Turtle(shape="turtle")})
+    for i, (name, color) in enumerate(zip(data["names"], data["colors"])):
+        t = Turtle()
+        if species == "snakes":
+            drawer(t, SNAKE_LENGTHS[i])
+        else:
+            drawer(t)
+        racers.append({'name': name, 'color': color, 'o': t})
     return racers
 
 
