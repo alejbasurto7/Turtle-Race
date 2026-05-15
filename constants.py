@@ -34,7 +34,10 @@ SNAKE_IMAGES  = {
     "Ralph":    "assets/snakes/Ralph.png",
     "Anaconda": "assets/snakes/Anaconda.png",
 }
-L_BASE = 1.0   # placeholder — tuned visually in Phase 4
+L_BASE = 0.6            # Phase 4 / CONTEXT-4 Decision 2: Shadow ≈ 36 units long (6*0.6*10),
+                        # fits the 300-unit-wide straight track; 6:5:2 ratio preserved.
+SNAKE_STRETCH_WID = 0.5 # Phase 4 / CONTEXT-4 Decision 2: snake width ≈ 5 units at default
+                        # classic shape; comfortably fits the 24-unit LANE_SPACING.
 
 # --- Species config ---
 SPECIES = {
