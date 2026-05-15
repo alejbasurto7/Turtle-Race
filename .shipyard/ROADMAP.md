@@ -36,7 +36,7 @@ Phases are ordered by dependency. Each phase ends with a verifiable checkpoint s
 
 ---
 
-## Phase 2 — Generalize `race.py` to N racers (turtle-only parity)
+## Phase 2 — Generalize `race.py` to N racers (turtle-only parity)  ✅ COMPLETE (2026-05-15)
 
 **Goal:** Refactor every N=4-hardcoded code path in `race.py` to a parameterized `N = len(racers)`, including renames `turtles_list` → `racers` and `create_turtles` → `create_racers(species)`. The end state at the close of this phase still runs **only turtles**; verifying parity here de-risks Phase 3/4.
 

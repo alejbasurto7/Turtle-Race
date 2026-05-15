@@ -48,3 +48,16 @@
 - Coverage verifier: PASS. Feasibility critique: READY.
 - Builder prompts will explicitly require SUMMARY-W.P.md disk writes + file-specific `git add` (Phase 1 lessons learned)
 - Ready for `/shipyard:build 2`
+- [2026-05-15T19:33:03Z] Session ended during build (may need /shipyard:resume)
+
+## 2026-05-15 — Phase 2 built and verified
+
+- Three sequential waves, one plan each (no parallelism — each wave reshaped APIs the next wave depended on)
+- Wave 1 PLAN-1.1: `tracks.py` hard refactor (12 functions take `n` explicitly, no defaults) + delete `N_LANES`. Verdict PASS, retries 0, task type: refactor. Single commit (cosmetic miss vs. per-task discipline)
+- Wave 2 PLAN-2.1: 22 new N=3/N=4 parametrized geometry tests + `race.py` rename (`turtles_list`→`racers`, `tortuga`→`racer`, `create_turtles`→`create_racers(species)`) + racer dicts get `'name'` field. Verdict PASS, retries 0, task type: refactor+test. Two commits (per-task discipline restored)
+- Wave 3 PLAN-3.1: `main.py` wire-up (10 call-site substitutions) + I2 docstring-comment fix from Wave 2 review. Verdict PASS pending human smoke. Two commits
+- 5 build commits total (`b6a4a12`, `c3f5804`, `267559d`, `e036be0`, `a9cc82e`)
+- `pytest`: 54 → 76 passed (22 new). Banned-identifier sweep: only `tests/test_tracks.py:38` (intentional prose comment)
+- Audit: CLEAN (pure refactor, no surface). Simplification: LOW_PRIORITY (pre-existing `_build_spiral_legs` shadow + `main.py` repeats `len(racers)` × 3 — both deferred to Phase 3/4). Documentation: MINOR_GAPS (`create_racers` docstring incomplete — fix when wiring snakes)
+- **Manual turtle-parity smoke: PASSED** — Alejandro confirmed 4-turtle race works correctly on all 3 tracks (straight, rectangular, spiral) with no visual regression
+- Ready for `/shipyard:plan 3`
