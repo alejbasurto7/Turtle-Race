@@ -141,25 +141,43 @@ def draw_turtle_shape(t):
     t.shape("turtle")
 
 
+# Custom snake polygon (head at +y, tail at -y, ~9 units long × 4 wide).
+# Designed to read as a snake silhouette: pointed head, neck pinch, body bulge,
+# tapered tail. Length matches the classic shape (9 units along heading) so the
+# same SHAPE_UNIT_SIZE = 9 head-offset math works.
+_SNAKE_POLYGON = (
+    ( 0,  0),   # head tip
+    (-2, -2),   # head left bottom
+    (-1, -4),   # neck pinch (left)
+    (-2, -5),   # body bulge (left)
+    (-1, -7),   # tail pinch (left)
+    ( 0, -9),   # tail tip
+    ( 1, -7),   # tail pinch (right)
+    ( 2, -5),   # body bulge (right)
+    ( 1, -4),   # neck pinch (right)
+    ( 2, -2),   # head right bottom
+)
+_snake_shape_registered = False
+
+
 def draw_snake_shape(t, length_units):
-    """Apply a stretched classic-arrow shape to represent a snake racer.
+    """Apply a custom snake polygon shape to a Turtle, scaled per length_units.
 
-    Uses the ``classic`` arrow shape scaled to:
-    - ``stretch_wid = SNAKE_STRETCH_WID`` (body thickness, < 1 keeps it slim)
-    - ``stretch_len = L_BASE * length_units`` (body length proportional to each
-      snake's length config in SNAKE_LENGTHS)
+    Registers the ``snake`` shape lazily on first call (it persists across
+    screen.clear() so we only register once per process). Then sets:
+    - ``stretch_wid = SNAKE_STRETCH_WID`` (body thickness)
+    - ``stretch_len = L_BASE * length_units`` (body length proportional to
+      each snake's SNAKE_LENGTHS entry)
 
-    Produces visually distinct lengths: Shadow (6 units) > Anaconda (5) > Ralph
-    (2), all at a 6:5:2 ratio. At L_BASE=0.6 and the classic shape's ~9-unit
-    native length axis, Shadow's body is ~32 px along the heading direction.
-
-    # PHASE-4-PLACEHOLDER: if the stretched-classic shape doesn't read as a
-    # snake at race scale during manual smoke, escalate by registering a 2-segment
-    # polygon silhouette via screen.register_shape("snake_<name>", polygon).
-    # register_shape persists across screen.clear() — register once at startup,
-    # not in the round loop. See CONTEXT-4.md Decision 1.
+    Produces visually distinct lengths: Shadow (6) > Anaconda (5) > Ralph (2),
+    at a 6:5:2 ratio. At L_BASE=1.2 and the polygon's 9-unit length axis,
+    Shadow ≈ 65 px along heading, Ralph ≈ 22 px.
     """
-    t.shape("classic")
+    global _snake_shape_registered
+    if not _snake_shape_registered:
+        _screen.register_shape("snake", _SNAKE_POLYGON)
+        _snake_shape_registered = True
+    t.shape("snake")
     t.shapesize(stretch_wid=SNAKE_STRETCH_WID, stretch_len=L_BASE * length_units)
 
 
@@ -402,7 +420,14 @@ def show_podium(racers, finish_order):
         top_y = PODIUM_BASE_Y + PODIUM_HEIGHTS[place]
         turtle = racers[lane_idx]['o']
         turtle.setheading(90)
-        turtle.shapesize(stretch_wid=3.0, stretch_len=3.0, outline=2)
+        # Snakes keep their race-time stretch_len so length proportions survive
+        # on the podium (Shadow > Anaconda > Ralph). Width is bumped for visibility.
+        # Turtles get a uniform 3.0×3.0 enlargement (their race-time stretch is 1.0×1.0).
+        if turtle.shape() == "snake":
+            _, current_stretch_len, _ = turtle.shapesize()
+            turtle.shapesize(stretch_wid=2.0, stretch_len=current_stretch_len, outline=2)
+        else:
+            turtle.shapesize(stretch_wid=3.0, stretch_len=3.0, outline=2)
         turtle.goto(cx, top_y + 30)
         turtle.showturtle()
         turtle.stamp()
