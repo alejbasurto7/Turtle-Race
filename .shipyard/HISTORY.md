@@ -26,3 +26,12 @@
 - 3 plans written: PLAN-1.1 (TDD red — 9 new tests), PLAN-2.1 (constants + SPECIES, parallel), PLAN-2.2 (spec edit + git-add PNGs, parallel)
 - Coverage verifier: PASS. Feasibility critique: READY.
 - Ready for `/shipyard:build 1`
+
+## 2026-05-15 — Phase 1 built and verified
+
+- Wave 1: PLAN-1.1 added 9 failing tests (TDD red). Builder: sonnet, verdict PASS, retries 0, task type: test
+- Wave 2 (parallel): PLAN-2.1 (constants + SPECIES) + PLAN-2.2 (spec edit + git-add PNGs). Both verdict PASS, retries 0
+- Net: 5 commits (`2e52386`, `a79867e`, `825a044`, `2681e4b`, `c7e89ed`). `pytest` 54/54 pass
+- Audit: CLEAN. Simplification: LOW_PRIORITY (project_root duplication in tests, defer). Documentation: MINOR_GAPS (SNAKE_LENGTHS comment readability + CLAUDE.md deferral)
+- **Cosmetic issue:** commit `2681e4b` (Plan 2.1) bundled the snake PNGs alongside `constants.py` — was supposed to be Plan 2.2's commit. Cause: broad `git add`. End state correct; no remediation. Phase 2+ dispatches should remind builders to use file-specific `git add`.
+- Ready for `/shipyard:plan 2`

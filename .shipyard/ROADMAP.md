@@ -6,7 +6,7 @@ Phases are ordered by dependency. Each phase ends with a verifiable checkpoint s
 
 ---
 
-## Phase 1 — Snake constants & `SPECIES` config foundation
+## Phase 1 — Snake constants & `SPECIES` config foundation  ✅ COMPLETE (2026-05-15)
 
 **Goal:** Land all snake identity data + the `SPECIES` config dict in `constants.py`, register snake PNGs in the PyInstaller spec, and lock invariants with tests. Pure data — no behavior changes yet.
 
