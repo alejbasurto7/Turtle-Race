@@ -133,9 +133,21 @@ def draw_finish_line(track_name, n):
 
 
 def create_racers(species: str):
-    """Create racer dicts for the given species.
+    """Create the field of racers for the given species.
 
-    Returns a list of {'name': ..., 'color': ..., 'o': Turtle(...)}.
+    Args:
+        species: A key into constants.SPECIES (currently ``"turtles"`` or
+            ``"snakes"``).  Raises ``KeyError`` on an unrecognised value.
+
+    Returns:
+        A list of racer dicts ordered by ``SPECIES[species]["names"]``. Each
+        dict has:
+
+        - ``'name'``:  str — the racer's name (matches
+          ``SPECIES[species]["names"][i]``).
+        - ``'color'``: str — pen/fill color (matches
+          ``SPECIES[species]["colors"][i]``).
+        - ``'o'``:     turtle.Turtle — the underlying turtle object.
     """
     # Shape dispatch (shape_drawer sentinel) is Phase 4's concern.
     data = SPECIES[species]
