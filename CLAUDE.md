@@ -36,27 +36,41 @@ Output lands in `dist/TurtleRace.exe`. Build intermediates in `build/` and `dist
 
 Single-process Tk app. Three runtimes share the same Tk root and must coexist:
 
-- **`turtle` module** drives the race animation. `Screen()` is created once at module load (in [main.py](main.py)) and reused across rounds via `s.clear()` + re-`set_background()` rather than recreated.
-- **`tkinter`** owns the bet dialog ([main.py:31](main.py#L31)) and the "play again?" `messagebox`. The bet dialog uses `Toplevel` + `grab_set()` + `wait_window()` to block until the user picks a turtle.
-- **`pygame.mixer`** plays the looped MIDI soundtrack as background music ([main.py:22](main.py#L22)). It is initialized once and stopped on exit.
+- **`turtle` module** drives the race animation. `Screen()` is created once via `race.make_screen()` and reused across rounds via `screen.clear()` + re-`set_background()` rather than recreated.
+- **`tkinter`** owns the three modal dialogs in [dialogs.py](dialogs.py) — track selection, species selection, bet — and the "play again?" `messagebox`. Each dialog uses `Toplevel` + `grab_set()` + `wait_window()` to block until the user chooses, with `WM_DELETE_WINDOW` no-op to force a choice.
+- **`pygame.mixer`** plays the looped MIDI soundtrack as background music (initialized and stopped via [audio.py](audio.py)). It is started once at the top of `main()` and stopped on exit.
 
 ### Resource loading (PyInstaller-aware)
 
-All asset paths must be resolved through `resource_path()` ([main.py:17](main.py#L17)), which honors `sys._MEIPASS` so the frozen build can find bundled files. When you add a new asset, also add it to the `datas=` list in [turtle_race.spec](turtle_race.spec) — otherwise it works from source but breaks in the packaged exe.
+All asset paths must be resolved through `resource_path()` (defined in [paths.py](paths.py)), which honors `sys._MEIPASS` so the frozen build can find bundled files. When you add a new asset, also add it to the `datas=` list in [turtle_race.spec](turtle_race.spec) — otherwise it works from source but breaks in the packaged exe. Note: glob patterns in `datas=` do **not** recurse, so subdirectories like `assets/snakes/*.png` need their own entries.
 
-### Turtle identity is positional
+### Racer identity is positional, and species-dispatched
 
-[constants.py](constants.py) defines `TURTLE_NAMES`, `TURTLE_COLORS`, and `TURTLE_IMAGES`. Code relies on these invariants:
+[constants.py](constants.py) defines per-species identity lists and a `SPECIES` config dict that downstream code dispatches on. Code relies on these invariants:
 
-- `TURTLE_NAMES[i]` and `TURTLE_COLORS[i]` describe the **same** turtle.
-- `TURTLE_IMAGES` is keyed by name, and `tests/test_constants.py` enforces that its keys match `TURTLE_NAMES` exactly.
-- `user_bet` is 1-based; `turtles[user_bet - 1]` is the user's pick. The bet dialog computes this with `TURTLE_NAMES.index(name) + 1`.
-- The 2x2 bet grid layout is decoupled from `TURTLE_NAMES` order — it's hard-coded in `grid_layout` ([main.py:49](main.py#L49)) to match the position hints in the asset filenames (`top_left`, `top_right`, etc.).
+- **Per-species positional lists:** `TURTLE_NAMES[i] ↔ TURTLE_COLORS[i]`; `SNAKE_NAMES[i] ↔ SNAKE_COLORS[i] ↔ SNAKE_LENGTHS[i]`. Image dicts (`TURTLE_IMAGES`, `SNAKE_IMAGES`) are keyed by name, and `tests/test_constants.py` enforces key/name parity.
+- **`SPECIES`** is the dispatch surface — `SPECIES["turtles"]` and `SPECIES["snakes"]` each carry `names`, `colors`, `images`, `bet_layout`, and `shape_drawer`. `shape_drawer` is a **string sentinel** (`"turtle"` / `"snake"`) — never a callable — to keep `constants.py` import-clean (no `race.py` circular import).
+- **Bet indexing:** `user_bet` is 1-based; `racers[user_bet - 1]` is the user's pick. The bet dialog computes this as `SPECIES[species]["names"].index(name) + 1`.
+- **Bet-grid layouts** are module-level constants in [dialogs.py](dialogs.py): `_TURTLE_GRID_LAYOUT` (2×2, matches the position hints in turtle JPG filenames) and `_SNAKE_ROW_LAYOUT` (1×3, in `SNAKE_NAMES` order).
+- **Snake length ratio** is by name, not list position: `SNAKE_LENGTHS = [6, 2, 5]` (positional with `SNAKE_NAMES = ["Shadow", "Ralph", "Anaconda"]`); the 6:5:2 visual ratio is Shadow:Anaconda:Ralph **by value**, which is locked by `test_snake_lengths_positional_values`.
+- **Hex pencolor caveat:** `turtle.color("#RRGGBB")` round-trips through `pencolor()` as an `(r, g, b)` tuple, not the original string. When logging/displaying a racer's color, read it from the racer dict (`racer['color']`), not via `pencolor()`. Tuple-vs-string equality still works for win-detection, but format specs like `{color:<12}` crash on tuples.
+
+### N-parameterized track geometry
+
+[tracks.py](tracks.py) is fully generalized over the number of racers. Every public function takes `n: int` explicitly — there is no `N_LANES` constant and no default. `race.create_racers(species)` and `race.place_racers_on_track(racers, track_name)` derive `n = len(racers)` and thread it through.
 
 ### Tk image references
 
-`PhotoImage` objects must be retained or Tk garbage-collects them and the images vanish. The dialog stashes them on `dialog._bet_images`; the background image is stashed on `canvas._bg_photo`. Preserve this pattern when adding images.
+`PhotoImage` objects must be retained or Tk garbage-collects them and the buttons go blank. Each dialog stashes them on its own list:
 
-### Main loop shape
+- `dialog._track_images` (in `get_user_track`)
+- `dialog._species_images` (in `get_user_species`)
+- `dialog._bet_images` (in `get_user_bet`, both turtle and snake branches share the same list)
 
-The outer `while keep_playing` loop in [main.py](main.py) is the round loop. The inner `while is_race_on` advances every turtle by `random.randint(0, MAX_PACE)` per tick until one crosses the finish line at `x = (WINDOW_WIDTH - TURTLE_LENGTH) / 2`. There is a vestigial `cheat_mode` branch wired up but `get_user_input()` always returns `cheat_mode=False`.
+The background image is stashed on `canvas._bg_photo`. Preserve this pattern when adding images.
+
+### Round loop shape
+
+The outer `while keep_playing` loop in [main.py](main.py) is the round loop. Each round flows: `set_background()` → `get_user_track()` → `get_user_species()` → `create_racers(species)` → place/draw → `get_user_bet(species)` → `run_race(racers, ...)` → `show_podium` → `celebrate` → `announce_result` → `ask_play_again()`.
+
+The race loop itself lives in `race.run_race(...)`. It advances every racer along its lane path by a fraction of `shared_distance` per tick (so longer lanes like the spiral don't auto-lose), detects finishers, and runs a fixed `COAST_TICKS` post-finish coast for visual polish. No `is_race_on` boolean, no `cheat_mode` branch — those were removed during the Phase 2 generalization.

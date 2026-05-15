@@ -67,7 +67,7 @@ Phases are ordered by dependency. Each phase ends with a verifiable checkpoint s
 
 ---
 
-## Phase 3 — Species + snake-aware bet dialogs
+## Phase 3 — Species + snake-aware bet dialogs  ✅ COMPLETE (2026-05-15)
 
 **Goal:** Insert the species dialog into the round flow and make `get_user_bet` species-aware. End of phase: picking "Turtles" runs the existing flow; picking "Snakes" reaches the bet step and returns a valid bet (race still uses turtle drawing — wired in Phase 4).
 

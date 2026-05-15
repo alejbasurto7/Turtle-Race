@@ -71,4 +71,6 @@
   - PLAN-2.1: `get_user_species()` + `main.py` wire-up + opportunistic `n = len(racers)` hoist + opportunistic `create_racers` docstring fix
 - **PLAN-2.2 dropped during critique** — architect tried to formalize the post-build review pass as a "build" plan to force REVIEW disk writes. Redundant with the workflow's standard Step 4c reviewer dispatch. Its excellent review checklist will be embedded into the reviewer prompts I dispatch at build time.
 - Coverage verifier: PASS. Feasibility critique: READY with one CAUTION (image-composition JPG/RGBA mode mismatch — builder prompt must require `img.convert("RGBA")` before paste)
-- Ready for `/shipyard:build 3`
+- Ready for `/shipyard:build 3`- [2026-05-15T21:10:04Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-15T21:12:18Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-15T21:15:10Z] Session ended during build (may need /shipyard:resume)

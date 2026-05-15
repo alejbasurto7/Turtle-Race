@@ -1,7 +1,7 @@
 {
   "phase": 3,
-  "position": "Phase 3 planned, ready for build",
-  "status": "planned",
-  "message": "Phase 3 plans written and verified: coverage PASS, critique READY (PLAN-2.2 dropped as redundant)",
+  "position": "Phase 3 build complete (manual smoke confirmed); ready to plan Phase 4",
+  "status": "complete",
+  "message": "Phase 3 complete: species dialog + species-aware bet wired end-to-end; both modes reach podium; CLAUDE.md updated; 77/77 tests pass",
   "updated_at": "2026-05-15T00:00:00Z"
 }
