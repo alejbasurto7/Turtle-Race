@@ -53,7 +53,15 @@ All asset paths must be resolved through `resource_path()` (defined in [paths.py
 - **Bet indexing:** `user_bet` is 1-based; `racers[user_bet - 1]` is the user's pick. The bet dialog computes this as `SPECIES[species]["names"].index(name) + 1`.
 - **Bet-grid layouts** are module-level constants in [dialogs.py](dialogs.py): `_TURTLE_GRID_LAYOUT` (2×2, matches the position hints in turtle JPG filenames) and `_SNAKE_ROW_LAYOUT` (1×3, in `SNAKE_NAMES` order).
 - **Snake length ratio** is by name, not list position: `SNAKE_LENGTHS = [6, 2, 5]` (positional with `SNAKE_NAMES = ["Shadow", "Ralph", "Anaconda"]`); the 6:5:2 visual ratio is Shadow:Anaconda:Ralph **by value**, which is locked by `test_snake_lengths_positional_values`.
-- **Hex pencolor caveat:** `turtle.color("#RRGGBB")` round-trips through `pencolor()` as an `(r, g, b)` tuple, not the original string. When logging/displaying a racer's color, read it from the racer dict (`racer['color']`), not via `pencolor()`. Tuple-vs-string equality still works for win-detection, but format specs like `{color:<12}` crash on tuples.
+- **Hex pencolor caveat:** `turtle.color("#RRGGBB")` round-trips through `pencolor()` as an `(r, g, b)` tuple, not the original string. When logging/displaying a racer's color, read it from the racer dict (`racer['color']`), not via `pencolor()`. For win detection use racer-dict identity (`winner_racer['o'] is racers[user_bet - 1]['o']`), not pencolor equality, since two racers could theoretically share a color.
+
+### Shape dispatch and finish detection
+
+`race._SHAPE_DRAWERS` maps each `shape_drawer` sentinel to its drawer callable (`draw_turtle_shape` for `"turtle"`, `draw_snake_shape` for `"snake"`). To add a third species, register its drawer there — do not branch in `create_racers`. The snake shape itself is a custom polygon registered lazily on first `draw_snake_shape` call via `screen.register_shape("snake", _SNAKE_POLYGON)`; `register_shape` persists across `screen.clear()`, so the lazy guard prevents re-registration across rounds.
+
+Head-position finish detection in `run_race` is universal: it reads each racer's `shapesize()[1]` (stretch_len) once at race start, computes a per-racer `head_offset_progress[]` parallel array, and checks `progress[i] >= shared_distance - head_offset_progress[i]`. The `_SHAPE_UNIT_SIZE = 9` constant is calibrated for the classic shape and reused for the snake polygon (which is also 9 units long); `turtle` shape uses the same 9 as an approximation, which is harmless because the turtle race is symmetric across all 4 racers.
+
+Podium scaling in `show_podium` is species-aware: turtles get a uniform `(3.0, 3.0)` enlargement; snakes preserve their race-time `stretch_len` (so the 6:5:2 length ratio survives) and just bump width to `2.0` for visibility.
 
 ### N-parameterized track geometry
 
