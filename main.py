@@ -37,9 +37,9 @@ def main():
 
         winning_turtle, finish_order = race.run_race(racers, track_name, user_bet)
 
-        user_won = winning_turtle.pencolor() == racers[user_bet - 1]['o'].pencolor()
+        user_won = winning_turtle is racers[user_bet - 1]['o']
         race.show_podium(racers, finish_order)
-        race.celebrate(winning_turtle, user_won)
+        race.celebrate(winning_turtle, user_won, racers)
         race.announce_result(winning_turtle, user_bet, racers)
 
         keep_playing = dialogs.ask_play_again()
