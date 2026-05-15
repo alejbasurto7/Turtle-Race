@@ -192,14 +192,14 @@ def _build_spiral_legs(w: float, h: float, step: float, max_pairs: int | None = 
     """
     headings = (90, 0, 270, 180)
     legs: list[tuple[float, float]] = []
-    for n in range(max_legs):
-        pair_idx = n // 2
+    for leg_i in range(max_legs):
+        pair_idx = leg_i // 2
         if max_pairs is not None and pair_idx >= max_pairs:
             break
-        length = (h if n % 2 == 0 else w) - pair_idx * step
+        length = (h if leg_i % 2 == 0 else w) - pair_idx * step
         if length <= 0:
             break
-        legs.append((headings[n % 4], length))
+        legs.append((headings[leg_i % 4], length))
     return legs
 
 
