@@ -118,12 +118,14 @@ def _rectangular_finish_y() -> float:
 def _spiral_lane(lane_idx: int) -> dict:
     """Each lane is a nested rectangular spiral.
 
-    Each lane starts at its own outermost-lap BL corner (so the 4 starts
-    are staggered diagonally, producing visibly separate tick marks at the
-    start). It then runs the standard CW spiral inward, and finishes with a
-    "homing" leg from the spiral's natural endpoint to the canvas origin
-    (0, 0) so every lane terminates at the same point and the finish line
-    can be drawn as a single straight bar there.
+    Each lane starts on its own outermost-lap left edge, shifted NORTH along
+    that edge by a per-lane head-start (outer lanes get the largest shift,
+    innermost gets none) so the start ticks form a pronounced staircase
+    rising toward the outer lane — the standard staggered-start convention
+    of real racing tracks. The path then runs the standard CW spiral inward
+    and finishes with a "homing" leg from the spiral's natural endpoint to
+    the canvas origin (0, 0) so every lane terminates at the same point and
+    the finish line can be drawn as a single straight bar there.
 
     Spiral pair-count is capped via `_spiral_pair_cap()` so all lanes run
     the same number of spiral legs (keeps natural endpoints clustered, so
@@ -154,7 +156,17 @@ def _spiral_lane(lane_idx: int) -> dict:
     legs.append((vert_heading, abs(cy)))
     horiz_heading = 180 if cx > 0 else 0        # W (180) if east of origin, else E (0)
     legs.append((horiz_heading, abs(cx)))
-    return {"start": (bl_x, bl_y), "legs": legs}
+
+    # Staggered start: shift each lane's start up its first (north) leg by an
+    # amount proportional to its outer-ness, then shorten the first leg by
+    # the same amount. The leg's endpoint — and therefore every leg after it
+    # and the natural endpoint — stays put, so the homing legs above remain
+    # correct without recomputation.
+    pre_distance = (N_LANES - 1 - lane_idx) * (LANE_SPACING * 2)
+    first_heading, first_length = legs[0]
+    pre_distance = min(pre_distance, max(first_length - 1, 0))
+    legs[0] = (first_heading, first_length - pre_distance)
+    return {"start": (bl_x, bl_y + pre_distance), "legs": legs}
 
 
 def _spiral_pair_cap() -> int:
@@ -310,12 +322,15 @@ def _boundary_paths(track_name: str) -> list[dict]:
         return [outer, inner]
 
     if track_name == SPIRAL:
-        # Same shrinking-spiral generator as the lanes, but uncapped: the
-        # boundary traces every lap until legs naturally die out. Lanes
-        # use _spiral_pair_cap() for cross-lane consistency, and that cap
-        # is sized for the INNERMOST lane — undercutting what the
-        # boundary (larger than every lane) can naturally draw.
+        # Same shrinking-spiral generator as the lanes. Lanes use
+        # _spiral_pair_cap() for cross-lane consistency (that cap is sized
+        # for the INNERMOST lane), but the boundary is bigger and can fit
+        # more loops naturally. Run it to its natural end, then drop the
+        # innermost pair of legs so the boundary stones stop short of the
+        # finish-line bar that's drawn through the origin.
         legs = _build_spiral_legs(w, h, SPIRAL_STEP)
+        if len(legs) >= 4:
+            legs = legs[:-2]
         return [{"start": (bl_x, bl_y), "legs": legs}]
 
     raise KeyError(track_name)
@@ -363,8 +378,8 @@ def finish_line_segments(track_name: str) -> list[tuple[tuple[float, float], tup
         return [((center_x - half_len, y), (center_x + half_len, y))]
 
     if track_name == SPIRAL:
-        # Single vertical bar through the origin, length sized to span the
-        # full lane stack so it reads as a clearly visible "finish line".
+        # Vertical bar centered on the origin (where every lane terminates),
+        # sitting in the empty inner area of the spiral.
         half_len = N_LANES * LANE_SPACING
         return [((0.0, -half_len), (0.0, half_len))]
 

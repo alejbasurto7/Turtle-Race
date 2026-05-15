@@ -175,14 +175,16 @@ def test_spiral_lanes_all_end_at_origin():
 
 
 def test_spiral_legs_decreasing():
-    # Skip the final 2 homing legs (vertical + horizontal, used to bring
-    # the lane orthogonally to the origin). The canonical shrinking-spiral
-    # pattern only applies to the legs before them.
+    # Skip the first leg (truncated by the staggered-start head-start, so it
+    # no longer fits the canonical shrinking pattern) and the final 2 homing
+    # legs (vertical + horizontal, used to bring the lane orthogonally to the
+    # origin). The canonical shrinking-spiral pattern only applies in between.
     paths = build_lane_paths(SPIRAL)
     for p in paths:
-        legs = p["legs"][:-2]
-        vertical = [length for i, (_, length) in enumerate(legs) if i % 2 == 0]
-        horizontal = [length for i, (_, length) in enumerate(legs) if i % 2 == 1]
+        legs = p["legs"][1:-2]
+        # After dropping the first vertical leg, leg 0 is now horizontal.
+        horizontal = [length for i, (_, length) in enumerate(legs) if i % 2 == 0]
+        vertical = [length for i, (_, length) in enumerate(legs) if i % 2 == 1]
         for i in range(len(vertical) - 1):
             assert vertical[i] > vertical[i + 1]
         for i in range(len(horizontal) - 1):
@@ -292,15 +294,18 @@ def test_straight_finish_segments_share_x_and_span_lanes():
     assert len(xs) == 1
 
 
-def test_spiral_finish_is_single_bar_through_origin():
+def test_spiral_finish_is_single_bar_centered_on_origin():
     bars = finish_line_segments(SPIRAL)
     assert len(bars) == 1
     (x0, y0), (x1, y1) = bars[0]
-    # Vertical bar passing through (0, 0): both endpoints have x == 0,
-    # midpoint at y == 0.
+    # Vertical bar with both endpoints at x == 0, centered on the origin
+    # (where every lane terminates).
     assert _approx(x0, 0.0)
     assert _approx(x1, 0.0)
-    assert _approx((y0 + y1) / 2, 0.0)
+    ys = sorted([y0, y1])
+    assert ys[0] < 0
+    assert ys[1] > 0
+    assert _approx(ys[0], -ys[1])
 
 
 def test_straight_start_returns_one_connecting_bar():

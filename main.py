@@ -34,9 +34,10 @@ def main():
 
         user_bet = dialogs.get_user_bet()
 
-        winning_turtle = race.run_race(turtles_list, track_name, user_bet)
+        winning_turtle, finish_order = race.run_race(turtles_list, track_name, user_bet)
 
         user_won = winning_turtle.pencolor() == turtles_list[user_bet - 1]['o'].pencolor()
+        race.show_podium(turtles_list, finish_order)
         race.celebrate(winning_turtle, user_won)
         race.announce_result(winning_turtle, user_bet, turtles_list)
 

@@ -1,3 +1,4 @@
+import math
 import random
 import time
 from turtle import Turtle, Screen
@@ -15,6 +16,15 @@ CELEBRATION_Y = 180  # vertical offset so face/text aren't hidden by the centere
 
 STONE_COLOR = "gray30"
 STONE_DIAMETER = 3
+
+# Finish-line checker tile size (px). Chosen to divide LANE_SPACING evenly so
+# adjacent per-lane bars on the STRAIGHT track tile into one continuous pattern.
+FINISH_CHECKER_SIZE = 6
+FINISH_CHECKER_ROWS = 2
+
+# Canvas tag for podium medal items; raised after any _screen.update() so they
+# stay on top of the turtle sprites (which turtle.py keeps tag_raising).
+PODIUM_MEDAL_TAG = "podium_medal"
 
 
 def make_screen():
@@ -56,6 +66,8 @@ def _draw_segment(p0, p1):
     pen = Turtle()
     pen.hideturtle()
     pen.penup()
+    pen.color("white")
+    pen.pensize(3)
     pen.goto(*p0)
     pen.pendown()
     pen.goto(*p1)
@@ -83,10 +95,39 @@ def draw_boundary_stones(track_name):
     _screen.tracer(1)
 
 
+def _draw_checkered_bar(p0, p1):
+    """Tile black/white squares along segment p0->p1, centered perpendicular to it."""
+    x0, y0 = p0
+    x1, y1 = p1
+    dx, dy = x1 - x0, y1 - y0
+    length = math.hypot(dx, dy)
+    if length == 0:
+        return
+    ux, uy = dx / length, dy / length    # unit vector along segment
+    px, py = -uy, ux                     # perpendicular (left of direction)
+    n_cols = max(1, int(round(length / FINISH_CHECKER_SIZE)))
+    size = length / n_cols
+    half_rows = FINISH_CHECKER_ROWS / 2
+    canvas = _screen.getcanvas()
+    for row in range(FINISH_CHECKER_ROWS):
+        for col in range(n_cols):
+            base_x = x0 + ux * col * size + px * (row - half_rows) * size
+            base_y = y0 + uy * col * size + py * (row - half_rows) * size
+            color = "black" if (row + col) % 2 == 0 else "white"
+            c1x, c1y = base_x + ux * size, base_y + uy * size
+            c2x, c2y = c1x + px * size, c1y + py * size
+            c3x, c3y = base_x + px * size, base_y + py * size
+            # Tk canvas y is inverted relative to turtle coords.
+            canvas.create_polygon(
+                base_x, -base_y, c1x, -c1y, c2x, -c2y, c3x, -c3y,
+                fill=color, outline=color,
+            )
+
+
 def draw_finish_line(track_name):
     _screen.tracer(0)
     for p0, p1 in tracks.finish_line_segments(track_name):
-        _draw_segment(p0, p1)
+        _draw_checkered_bar(p0, p1)
     _screen.update()
     _screen.tracer(1)
 
@@ -141,40 +182,169 @@ def run_race(turtles_list, track_name, user_bet):
         color = turtle['o'].pencolor()
         print(f"  {i:>4}  {name:<14} {color:<12} ({x0:>7.1f}, {y0:>7.1f})    {lane_lengths[i]:>11.1f}")
 
+    COAST_TICKS = 30                             # extra ticks turtles run past the finish line
     winning_turtle = None
-    winner_index = None
-    first_place = False
+    finish_order = []                            # lane indices in order of crossing the line
     ticks = 0
+    finish_ticks = [None] * len(turtles_list)    # tick number each lane finished on
+    coast_remaining = [None] * len(turtles_list) # ticks left in the post-finish coast phase
+    done = [False] * len(turtles_list)
     _screen.tracer(0)
-    while not first_place:
+    while not all(done):
         for i, turtle in enumerate(turtles_list):
+            if done[i]:
+                continue
             step = random.randint(0, MAX_PACE)
-            progress[i] = min(progress[i] + step, shared_distance)
-            fraction = progress[i] / shared_distance
-            arc = fraction * lane_lengths[i]
-            x, y, heading = tracks.position_at_arc(lane_paths[i], arc)
-            turtle['o'].setheading(heading)
-            turtle['o'].goto(x, y)
-            if progress[i] >= shared_distance and not first_place:
-                winning_turtle = turtle['o']
-                winner_index = i
-                first_place = True
+            if progress[i] < shared_distance:
+                progress[i] = min(progress[i] + step, shared_distance)
+                fraction = progress[i] / shared_distance
+                arc = fraction * lane_lengths[i]
+                x, y, heading = tracks.position_at_arc(lane_paths[i], arc)
+                turtle['o'].setheading(heading)
+                turtle['o'].goto(x, y)
+                if progress[i] >= shared_distance:
+                    finish_order.append(i)
+                    finish_ticks[i] = ticks + 1
+                    if winning_turtle is None:
+                        winning_turtle = turtle['o']
+                    coast_remaining[i] = COAST_TICKS
+            else:
+                # Coasting past the finish at the same visual pace they had on track.
+                visual_step = step * (lane_lengths[i] / shared_distance)
+                turtle['o'].forward(visual_step)
+                coast_remaining[i] -= 1
+                if coast_remaining[i] <= 0:
+                    done[i] = True
         ticks += 1
         _screen.update()
         time.sleep(TICK_DELAY)
     _screen.tracer(1)
 
+    place_labels = ["1st", "2nd", "3rd", "4th"]
     print(f"--- Race end after {ticks} ticks ---")
-    print(f"  {'lane':>4}  {'name':<14} {'distance':>10}  {'lane_length':>11}  {'% done':>7}")
-    for i in range(len(turtles_list)):
-        fraction = progress[i] / shared_distance
-        distance = fraction * lane_lengths[i]
-        name = TURTLE_NAMES[i] if i < len(TURTLE_NAMES) else f"#{i}"
-        marker = "  <-- winner" if i == winner_index else ""
-        print(f"  {i:>4}  {name:<14} {distance:>10.1f}  {lane_lengths[i]:>11.1f}  {fraction*100:>6.1f}%{marker}")
+    print(f"  {'place':<5}  {'lane':>4}  {'name':<14} {'distance':>10}  {'lane_length':>11}  {'finish_tick':>11}")
+    for place, lane_idx in enumerate(finish_order):
+        distance = (progress[lane_idx] / shared_distance) * lane_lengths[lane_idx]
+        name = TURTLE_NAMES[lane_idx] if lane_idx < len(TURTLE_NAMES) else f"#{lane_idx}"
+        label = place_labels[place] if place < len(place_labels) else f"{place+1}th"
+        print(f"  {label:<5}  {lane_idx:>4}  {name:<14} {distance:>10.1f}  {lane_lengths[lane_idx]:>11.1f}  {finish_ticks[lane_idx]:>11}")
     print()
 
-    return winning_turtle
+    return winning_turtle, finish_order
+
+
+def show_podium(turtles_list, finish_order):
+    """Stage the top-3 turtles on a 2-1-3 podium with gold/silver/bronze medals.
+
+    Hides all race turtles, then re-shows the top three at larger scale on
+    podium platforms. Drawn over the race scene so the existing background and
+    finish-line graphics stay visible behind the podium blocks.
+    """
+    if len(finish_order) < 3:
+        return
+
+    _screen.tracer(0)
+    for tortuga in turtles_list:
+        tortuga['o'].hideturtle()
+
+    PODIUM_W = 110
+    PODIUM_HEIGHTS = {1: 140, 2: 100, 3: 70}
+    # Platforms sit edge-to-edge (cx spacing == PODIUM_W) so they read as one
+    # connected podium rather than three separate blocks.
+    PODIUM_X = {2: -PODIUM_W, 1: 0, 3: PODIUM_W}  # left-to-right: 2, 1, 3
+    # Pushed well below center so the "play again?" messagebox (which is
+    # centered on the Tk root) doesn't cover the podium / medals.
+    PODIUM_BASE_Y = -320
+    MEDAL_COLORS = {1: "gold", 2: "silver", 3: "#cd7f32"}
+
+    pen = Turtle()
+    pen.hideturtle()
+    pen.penup()
+    pen.speed("fastest")
+
+    # Pass 1: podium platforms + place numbers.
+    for place in (2, 1, 3):
+        cx = PODIUM_X[place]
+        h = PODIUM_HEIGHTS[place]
+        top_y = PODIUM_BASE_Y + h
+        left = cx - PODIUM_W / 2
+        right = cx + PODIUM_W / 2
+
+        pen.color("black", "white")
+        pen.goto(left, PODIUM_BASE_Y)
+        pen.setheading(0)
+        pen.pendown()
+        pen.begin_fill()
+        pen.goto(right, PODIUM_BASE_Y)
+        pen.goto(right, top_y)
+        pen.goto(left, top_y)
+        pen.goto(left, PODIUM_BASE_Y)
+        pen.end_fill()
+        pen.penup()
+
+        pen.color("black")
+        pen.goto(cx, PODIUM_BASE_Y + h / 2 - 24)
+        pen.write(str(place), align="center", font=("Arial", 28, "bold"))
+
+    # Pass 2: place the winning turtles on top of the platforms, then *stamp*
+    # them and hide the live turtle. The stamp is a static canvas item that
+    # turtle.py never re-raises on subsequent updates — unlike the live turtle
+    # sprite, which RawTurtle._drawturtle calls tag_raise on every update
+    # (top=True). This lets medals drawn afterward stay on top reliably.
+    for place in (1, 2, 3):
+        lane_idx = finish_order[place - 1]
+        cx = PODIUM_X[place]
+        top_y = PODIUM_BASE_Y + PODIUM_HEIGHTS[place]
+        turtle = turtles_list[lane_idx]['o']
+        turtle.setheading(90)
+        turtle.shapesize(stretch_wid=3.0, stretch_len=3.0, outline=2)
+        turtle.goto(cx, top_y + 30)
+        turtle.showturtle()
+        turtle.stamp()
+        turtle.hideturtle()
+
+    # Flush: makes every hidden turtle's _drawturtle run once and set
+    # _hidden_from_screen=True, so no live turtle items get tag_raised by
+    # subsequent _screen.update() calls (in celebrate / announce_result).
+    _screen.update()
+
+    # Pass 3: medals drawn directly to the Tk canvas. Now that all live turtle
+    # sprites are hidden, these stay on top without further tag-raising games.
+    canvas = _screen.getcanvas()
+
+    def t2c(tx, ty):  # turtle coords -> tk canvas coords (origin centered, y inverted)
+        return tx, -ty
+
+    for place in (1, 2, 3):
+        cx = PODIUM_X[place]
+        top_y = PODIUM_BASE_Y + PODIUM_HEIGHTS[place]
+        medal_color = MEDAL_COLORS[place]
+
+        disc_r = 18
+        # Disc sits on the turtle's chest, just below center.
+        disc_cx, disc_cy = t2c(cx, top_y + 18)
+        # Ribbon goes from above the turtle's head down to the disc.
+        rib_top_x_l, rib_top_y = t2c(cx - 10, top_y + 58)
+        rib_top_x_r, _ = t2c(cx + 10, top_y + 58)
+
+        canvas.create_line(
+            rib_top_x_l, rib_top_y, disc_cx - 5, disc_cy - disc_r + 3,
+            fill=medal_color, width=4, tags=PODIUM_MEDAL_TAG,
+        )
+        canvas.create_line(
+            rib_top_x_r, rib_top_y, disc_cx + 5, disc_cy - disc_r + 3,
+            fill=medal_color, width=4, tags=PODIUM_MEDAL_TAG,
+        )
+        canvas.create_oval(
+            disc_cx - disc_r, disc_cy - disc_r,
+            disc_cx + disc_r, disc_cy + disc_r,
+            fill=medal_color, outline="black", width=2,
+            tags=PODIUM_MEDAL_TAG,
+        )
+
+    canvas.tag_raise(PODIUM_MEDAL_TAG)
+    canvas.update_idletasks()
+    _screen.tracer(1)
 
 
 def announce_result(winner, user_bet, turtles_list):
@@ -192,6 +362,7 @@ def announce_result(winner, user_bet, turtles_list):
     writer.color(color)
     writer.write(text, align="center", font=("Arial", size, "bold"))
     _screen.update()
+    _screen.getcanvas().tag_raise(PODIUM_MEDAL_TAG)
     _screen.tracer(1)
 
 
@@ -245,4 +416,8 @@ def celebrate(winner, won):
         pen.circle(24, 180)
     pen.penup()
     _screen.update()
+    # update() re-raises every turtle sprite (RawTurtle._drawturtle passes
+    # top=True), pushing the podium medals behind the winners' chests. Lift
+    # the medals back to the top now that the last update is done.
+    _screen.getcanvas().tag_raise(PODIUM_MEDAL_TAG)
     _screen.tracer(1)
