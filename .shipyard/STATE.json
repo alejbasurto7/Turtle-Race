@@ -1,7 +1,8 @@
 {
-  "phase": "N/A",
-  "position": "Snakes Racer Mode milestone shipped",
-  "status": "shipped",
-  "message": "Shipped via push + GitHub Release v1.0-snakes on 2026-05-16. Run /shipyard:brainstorm to define the next milestone.",
-  "updated_at": "2026-05-16T00:00:00Z"
+  "schema": 3,
+  "phase": 1,
+  "position": "Phase 1 planned, ready for build",
+  "status": "planned",
+  "updated_at": "2026-05-16T20:44:55Z",
+  "blocker": null
 }
