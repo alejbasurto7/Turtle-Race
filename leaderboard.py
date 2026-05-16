@@ -142,6 +142,15 @@ class PerTrackRow:
 
 # --- Private query helpers ---
 
+_VALID_WINDOWS = frozenset({"all", "session", "today", "week", "month", "year"})
+
+
+def _validate_window(window: str) -> None:
+    """Raise ValueError immediately for unknown time_window values."""
+    if window not in _VALID_WINDOWS:
+        raise ValueError(f"unknown time_window: {window!r}")
+
+
 def _races_for_window(window: str) -> list[dict]:
     """Return the appropriate race source list for the given time window.
 
@@ -249,6 +258,7 @@ def query(
         now: injected datetime for test-time override (CONTEXT-1 Decision 4).
              Production callers omit this — it defaults to datetime.now().
     """
+    _validate_window(time_window)
     if now is None:
         now = datetime.now()
     records = _races_for_window(time_window)
@@ -292,6 +302,7 @@ def query_per_track(
         now: injected datetime for test-time override (CONTEXT-1 Decision 4).
              Production callers omit this — it defaults to datetime.now().
     """
+    _validate_window(time_window)
     if now is None:
         now = datetime.now()
     records = _races_for_window(time_window)
