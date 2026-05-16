@@ -141,22 +141,33 @@ def draw_turtle_shape(t):
     t.shape("turtle")
 
 
-# Custom snake polygon (head at +y, tail at -y, ~9 units long × 4 wide).
-# Designed to read as a snake silhouette: pointed head, neck pinch, body bulge,
-# tapered tail. Length matches the classic shape (9 units along heading) so the
-# same SHAPE_UNIT_SIZE = 9 head-offset math works.
+# Custom snake polygon — Nokia-retro-snake-inspired silhouette.
+# Head at +y (apex), tail at -y. Length 18 along heading, max width 6.
+# Body has 3 visible bulges per side suggesting segmented undulation;
+# head has a slight wider jaw; tail tapers to a point.
 _SNAKE_POLYGON = (
-    ( 0,  0),   # head tip
-    (-2, -2),   # head left bottom
-    (-1, -4),   # neck pinch (left)
-    (-2, -5),   # body bulge (left)
-    (-1, -7),   # tail pinch (left)
-    ( 0, -9),   # tail tip
-    ( 1, -7),   # tail pinch (right)
-    ( 2, -5),   # body bulge (right)
-    ( 1, -4),   # neck pinch (right)
-    ( 2, -2),   # head right bottom
+    # Head + right side, top to bottom
+    ( 0, 10),     # head apex
+    ( 3,  8),     # head right
+    ( 3,  6),     # jaw right
+    ( 1,  4),     # neck pinch right
+    ( 3,  2),     # body bulge right (segment 1)
+    ( 1,  0),     # body waist
+    ( 3, -2),     # body bulge right (segment 2)
+    ( 1, -4),     # body waist
+    ( 1, -6),     # tail right
+    ( 0, -8),     # tail tip
+    # Left side, bottom to top
+    (-1, -6),     # tail left
+    (-1, -4),     # body waist
+    (-3, -2),     # body bulge left (segment 2)
+    (-1,  0),     # body waist
+    (-3,  2),     # body bulge left (segment 1)
+    (-1,  4),     # neck pinch left
+    (-3,  6),     # jaw left
+    (-3,  8),     # head left
 )
+_SNAKE_POLYGON_LENGTH = 18   # length axis of _SNAKE_POLYGON (10 - (-8))
 _snake_shape_registered = False
 
 
@@ -170,8 +181,8 @@ def draw_snake_shape(t, length_units):
       each snake's SNAKE_LENGTHS entry)
 
     Produces visually distinct lengths: Shadow (6) > Anaconda (5) > Ralph (2),
-    at a 6:5:2 ratio. At L_BASE=1.2 and the polygon's 9-unit length axis,
-    Shadow ≈ 65 px along heading, Ralph ≈ 22 px.
+    at a 6:5:2 ratio. At L_BASE=1.2 and the polygon's 18-unit length axis,
+    Shadow ≈ 130 px along heading, Anaconda ≈ 108 px, Ralph ≈ 43 px.
     """
     global _snake_shape_registered
     if not _snake_shape_registered:
@@ -180,6 +191,16 @@ def draw_snake_shape(t, length_units):
     t.shape("snake")
     t.shapesize(stretch_wid=SNAKE_STRETCH_WID, stretch_len=L_BASE * length_units)
 
+
+# Per-shape "natural length" along heading axis, used by run_race's
+# head-position finish detection. The classic and turtle shapes are ~9 units
+# (turtle is approximate but symmetric race outcome makes it harmless); the
+# custom snake polygon is 18 units long.
+_SHAPE_UNIT_SIZE = {
+    "turtle": 9,
+    "classic": 9,
+    "snake":  _SNAKE_POLYGON_LENGTH,
+}
 
 # Resolves the string sentinel in SPECIES[species]["shape_drawer"] to a
 # callable. Keyed by the same string values used in constants.SPECIES.
@@ -269,21 +290,23 @@ def run_race(racers, track_name, user_bet):
     #   head_offset_progress = head_offset_arc * (shared_distance / lane_length)
     #   finish condition     : progress[i] >= shared_distance - head_offset_progress[i]
     #
-    # shape_unit_size = 9: the ``classic`` arrow polygon extends 9 units along
-    # the heading axis (RESEARCH.md §3).  Applied to turtles this is an
-    # approximation (the turtle polygon is smaller), but since it's applied
-    # uniformly the race outcome is symmetric — acceptable per CRITIQUE.md.
+    # shape_unit_size: the polygon's natural length along the heading axis.
+    # 9 for classic/turtle, 18 for the custom snake polygon — looked up in the
+    # module-level _SHAPE_UNIT_SIZE dict by shape name. Turtle uses 9 as an
+    # approximation (the turtle polygon is smaller) but the race outcome is
+    # symmetric so this is harmless — see CRITIQUE.md.
     #
     # Clamp stays at shared_distance (not the finish threshold) because
     # coast_remaining[i] is set the moment the finish check fires, and the
     # loop uses ``coast_remaining[i] is None`` to decide which branch to enter
     # rather than comparing progress against shared_distance directly.
     # This is simpler than lowering the clamp and avoids off-by-one edge cases.
-    _SHAPE_UNIT_SIZE = 9
     head_offset_progress = []
     for i in range(len(racers)):
+        shape_name = racers[i]['o'].shape()
+        unit_size = _SHAPE_UNIT_SIZE.get(shape_name, 9)
         stretch_len = racers[i]['o'].shapesize()[1]
-        head_offset_arc = _SHAPE_UNIT_SIZE * stretch_len / 2
+        head_offset_arc = unit_size * stretch_len / 2
         head_offset_progress.append(head_offset_arc * (shared_distance / lane_lengths[i]))
 
     print(f"\n=== Race start: {track_name} ===")
@@ -420,15 +443,20 @@ def show_podium(racers, finish_order):
         top_y = PODIUM_BASE_Y + PODIUM_HEIGHTS[place]
         turtle = racers[lane_idx]['o']
         turtle.setheading(90)
-        # Snakes keep their race-time stretch_len so length proportions survive
-        # on the podium (Shadow > Anaconda > Ralph). Width is bumped for visibility.
-        # Turtles get a uniform 3.0×3.0 enlargement (their race-time stretch is 1.0×1.0).
+        # Snakes preserve race-time stretch_len so the 6:5:2 length ratio
+        # survives on the podium; width is bumped to 3.0 for visibility.
+        # Snake center is positioned so the snake STANDS on the platform top
+        # (snake's bottom edge sits at top_y).
+        # Turtles get the original uniform 3.0×3.0 enlargement, centered above
+        # the platform.
         if turtle.shape() == "snake":
             _, current_stretch_len, _ = turtle.shapesize()
-            turtle.shapesize(stretch_wid=2.0, stretch_len=current_stretch_len, outline=2)
+            turtle.shapesize(stretch_wid=3.0, stretch_len=current_stretch_len, outline=2)
+            snake_visible_length = current_stretch_len * _SNAKE_POLYGON_LENGTH
+            turtle.goto(cx, top_y + snake_visible_length / 2)
         else:
             turtle.shapesize(stretch_wid=3.0, stretch_len=3.0, outline=2)
-        turtle.goto(cx, top_y + 30)
+            turtle.goto(cx, top_y + 30)
         turtle.showturtle()
         turtle.stamp()
         turtle.hideturtle()

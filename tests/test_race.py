@@ -17,7 +17,8 @@ CONTEXT-4.md Decision 3; turtles are symmetric so the approximation doesn't
 change race outcome.
 """
 
-SHAPE_UNIT_SIZE = 9   # classic arrow: 9 units along heading (RESEARCH.md §3)
+SHAPE_UNIT_SIZE = 9        # turtle/classic shape: 9 units along heading
+SNAKE_UNIT_SIZE = 18       # custom snake polygon (race._SNAKE_POLYGON): 18 units long
 
 
 def _head_offset_progress(stretch_len, shared_distance, lane_length):
@@ -84,23 +85,25 @@ def test_head_offset_progress_ratio_greater_than_one():
 
 def test_head_offset_arc_shadow():
     """Shadow: L_BASE=1.2, length_units=6 → stretch_len=7.2.
-    head_offset_arc = 9 * 7.2 / 2 = 32.4 px along heading.
+    Snake polygon SNAKE_UNIT_SIZE=18.
+    head_offset_arc = 18 * 7.2 / 2 = 64.8 px along heading.
     """
     stretch_len = 1.2 * 6   # 7.2
-    head_offset_arc = SHAPE_UNIT_SIZE * stretch_len / 2
-    assert abs(head_offset_arc - 32.4) < 1e-9, (
-        f"Shadow head_offset_arc: expected 32.4, got {head_offset_arc}"
+    head_offset_arc = SNAKE_UNIT_SIZE * stretch_len / 2
+    assert abs(head_offset_arc - 64.8) < 1e-9, (
+        f"Shadow head_offset_arc: expected 64.8, got {head_offset_arc}"
     )
 
 
 def test_head_offset_arc_ralph():
     """Ralph: L_BASE=1.2, length_units=2 → stretch_len=2.4.
-    head_offset_arc = 9 * 2.4 / 2 = 10.8 px along heading.
+    Snake polygon SNAKE_UNIT_SIZE=18.
+    head_offset_arc = 18 * 2.4 / 2 = 21.6 px along heading.
     """
     stretch_len = 1.2 * 2   # 2.4
-    head_offset_arc = SHAPE_UNIT_SIZE * stretch_len / 2
-    assert abs(head_offset_arc - 10.8) < 1e-9, (
-        f"Ralph head_offset_arc: expected 10.8, got {head_offset_arc}"
+    head_offset_arc = SNAKE_UNIT_SIZE * stretch_len / 2
+    assert abs(head_offset_arc - 21.6) < 1e-9, (
+        f"Ralph head_offset_arc: expected 21.6, got {head_offset_arc}"
     )
 
 # Note (no assertion): for turtles with stretch_len = 1.0 (default shapesize),
