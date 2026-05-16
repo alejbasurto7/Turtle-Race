@@ -1,7 +1,7 @@
 {
-  "phase": 5,
-  "position": "All 5 phases COMPLETE — milestone ready to ship; quick task 001 layered on top",
-  "status": "complete",
-  "message": "Quick task 001 complete: shuffled MIDI playlist replacing single-track soundtrack; 85/85 tests pass",
+  "phase": "N/A",
+  "position": "Snakes Racer Mode milestone shipped",
+  "status": "shipped",
+  "message": "Shipped via push + GitHub Release v1.0-snakes on 2026-05-16. Run /shipyard:brainstorm to define the next milestone.",
   "updated_at": "2026-05-16T00:00:00Z"
 }

@@ -154,3 +154,15 @@
 
 ## Quick Task 001 (2026-05-16)
 Quick task 001: Shuffled MIDI playlist soundtrack (complete) — audio.py rewritten to play `assets/midi/*.mid` in shuffled order, looping forever via a daemon polling thread; 85/85 tests still pass.
+
+## 2026-05-16 — SHIPPED 🎉
+
+- **Snakes Racer Mode milestone delivered.**
+- Pushed `master` to `https://github.com/alejbasurto7/Turtle-Race.git` (48 commits, `8e2827a..22b7b5b`)
+- Created GitHub Release [v1.0-snakes](https://github.com/alejbasurto7/Turtle-Race/releases/tag/v1.0-snakes) with MILESTONE-REPORT.md as release notes
+- Scope creep absorbed: quick-task 001 (MIDI shuffle playlist) folded into the milestone
+- LESSONS.md captured for retrospective; CLAUDE.md not updated with lessons (kept architecture-focused)
+- Cleanup: removed PROJECT.md, ROADMAP.md, phases/, quick/, MILESTONE-REPORT.md from `.shipyard/` — all preserved in git history + GitHub Release notes
+- Preserved across milestones: STATE.json, HISTORY.md, config.json, LESSONS.md, codebase/
+
+**Next:** Run `/shipyard:brainstorm` to define the next milestone (4th species? statistics? difficulty slider? Mac/Linux packaging?).
