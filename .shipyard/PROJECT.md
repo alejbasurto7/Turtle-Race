@@ -128,7 +128,7 @@ Round order: `set_background` → **track** → **species (NEW)** → **bet** �
 
 ## Open Items (resolve during planning/build)
 
-- Concrete hex for **Ralph**'s orange-tan color — decide during constants task.
-- Concrete value for the `L_BASE` length multiplier so Shadow (length 6) is visibly snake-ish but fits in its lane — tune visually during build verification.
-- Whether the stretched "classic" shape is sufficient for the snake silhouette, or whether to escalate to a registered custom polygon — decide visually during build verification, not up-front.
-- Spiral 3-lane geometry will likely need a manual visual-tuning pass on the running app, not just unit-test coverage.
+- ~~Concrete hex for **Ralph**'s orange-tan color — decide during constants task.~~ **RESOLVED:** `#E89F4F`
+- ~~Concrete value for the `L_BASE` length multiplier so Shadow (length 6) is visibly snake-ish but fits in its lane — tune visually during build verification.~~ **RESOLVED:** `1.2`
+- ~~Whether the stretched "classic" shape is sufficient for the snake silhouette, or whether to escalate to a registered custom polygon — decide visually during build verification, not up-front.~~ **RESOLVED:** custom Option 5 smooth-wave polygon registered as `"snake"`
+- Spiral 3-lane geometry will likely need a manual visual-tuning pass on the running app, not just unit-test coverage. **DEFERRED** per CONTEXT-5 Decision 1

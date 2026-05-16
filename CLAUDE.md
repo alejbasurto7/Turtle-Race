@@ -59,9 +59,9 @@ All asset paths must be resolved through `resource_path()` (defined in [paths.py
 
 `race._SHAPE_DRAWERS` maps each `shape_drawer` sentinel to its drawer callable (`draw_turtle_shape` for `"turtle"`, `draw_snake_shape` for `"snake"`). To add a third species, register its drawer there — do not branch in `create_racers`. The snake shape itself is a custom polygon registered lazily on first `draw_snake_shape` call via `screen.register_shape("snake", _SNAKE_POLYGON)`; `register_shape` persists across `screen.clear()`, so the lazy guard prevents re-registration across rounds.
 
-Head-position finish detection in `run_race` is universal: it reads each racer's `shapesize()[1]` (stretch_len) once at race start, computes a per-racer `head_offset_progress[]` parallel array, and checks `progress[i] >= shared_distance - head_offset_progress[i]`. The `_SHAPE_UNIT_SIZE = 9` constant is calibrated for the classic shape and reused for the snake polygon (which is also 9 units long); `turtle` shape uses the same 9 as an approximation, which is harmless because the turtle race is symmetric across all 4 racers.
+Head-position finish detection in `run_race` is universal: it reads each racer's `shapesize()[1]` (stretch_len) once at race start, computes a per-racer `head_offset_progress[]` parallel array, and checks `progress[i] >= shared_distance - head_offset_progress[i]`. `_SHAPE_UNIT_SIZE` maps shape names to their natural length along the heading axis: `9` for `"classic"` and `"turtle"` shapes, `20` for the custom `"snake"` polygon (`_SNAKE_POLYGON_LENGTH = 20`). The helpers `_head_offset_arc_for(t)` and `_back_pos(...)` in `race.py` back each racer's center behind its lane-start point so the racer's HEAD sits precisely at the lane start position.
 
-Podium scaling in `show_podium` is species-aware: turtles get a uniform `(3.0, 3.0)` enlargement; snakes preserve their race-time `stretch_len` (so the 6:5:2 length ratio survives) and just bump width to `2.0` for visibility.
+Podium scaling in `show_podium` is species-aware: turtles get a uniform `(3.0, 3.0)` enlargement; snakes preserve their race-time `stretch_len` (so the 6:5:2 length ratio survives) and just bump width to `3.0` for visibility.
 
 ### N-parameterized track geometry
 
