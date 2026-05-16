@@ -98,7 +98,7 @@ Phases are ordered by dependency. Each phase ends with a verifiable checkpoint s
 
 ---
 
-## Phase 4 — Snake in-race shape, length, head-finish detection
+## Phase 4 — Snake in-race shape, length, head-finish detection  ✅ COMPLETE (2026-05-16)
 
 **Goal:** Replace the placeholder turtle-shaped snake with a custom-drawn stretched-classic (or registered polygon fallback), per-snake `length_units` scaling, and head-position finish-line detection. End of phase: Snakes mode is feature-complete and visually correct on at least the straight and rectangular tracks.
 

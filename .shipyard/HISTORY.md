@@ -100,3 +100,31 @@
   - Wave 3 sequential: PLAN-3.1 (universal head-offset progress adjustment + tests/test_race.py + manual smoke gate)
 - Coverage verifier: PASS. Critique verifier stalled mid-task — CRITIQUE.md written inline. Verdict: READY with one minor caveat (shape_unit_size=9 hardcoded — calibrated for classic/snakes, approximated for turtle but symmetric race outcome means no behavior regression)
 - Ready for `/shipyard:build 4`
+- [2026-05-15T23:05:04Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-15T23:44:12Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-15T23:53:22Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-16T00:06:17Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-16T00:37:42Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-16T00:48:43Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-16T01:34:13Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-16T12:10:23Z] Session ended during build (may need /shipyard:resume)
+
+## 2026-05-16 — Phase 4 built and verified
+
+- 3 waves, 4 plans; verification + audit + simplification + documentation gates all closed
+- Wave 1 (parallel): PLAN-1.1 (L_BASE 0.6 + SNAKE_STRETCH_WID 0.5 + 2 tests) + PLAN-1.2 (dialogs.py stale-imports cleanup + get_user_species docstring + tracks.py n→leg_i rename). Both PASS
+- Wave 2: PLAN-2.1 (race.py shape dispatch _SHAPE_DRAWERS + draw_turtle_shape/draw_snake_shape extraction + announce_result/celebrate/main.py:40 win-check identity refactor). PASS
+- Wave 3: PLAN-3.1 (universal head-position finish detection in run_race + tests/test_race.py + manual smoke gate). PASS
+- Build commits: ded3720, ea47c30, 612faf5, 5c30980, c1a38f2, 8670e6c, d4c1a1a, 0704f03, 95f42d8, f810a69 (plan-driven)
+- **Smoke iterations** (user feedback drove 6 additional commits):
+  - ae58754: bumped L_BASE 0.6 → 1.2 (snakes too tiny) + S4.1 SNAKE_LENGTHS comment fix
+  - e65d80b: switched to first custom snake polygon (stretched-classic didn't read as snake) + podium scaling preserves snake proportions
+  - cff68e1: CLAUDE.md shape-dispatch documentation
+  - 4fb207e: 2nd snake polygon revision (Nokia-segmented, length 18) + podium snakes stand on platform
+  - 1625f59: final snake polygon (Option 5 smooth-wave, length 20) via tools/snake_shape_options.py comparison
+  - b54c8d2: HEAD-at-start placement (was straddling start line with body half-behind)
+- **Tools added:** tools/snake_shape_options.py — side-by-side polygon renderer for future shape iterations
+- pytest: 79 → 84 throughout (+5 head-offset math tests)
+- Audit: CLEAN. Simplification: LOW_PRIORITY (most carry-overs from prior phases either fixed in Phase 4 or noted; _SHAPE_UNIT_SIZE lifted to module-level as part of refactor). Documentation: MINOR_GAPS addressed via the cff68e1 CLAUDE.md update
+- **Manual smoke iterations: PASSED** — user confirmed snakes look snake-like (smooth wave silhouette), scale correctly, podium displays preserve length ratio, and HEAD-at-start placement looks right
+- Ready for `/shipyard:plan 5`
