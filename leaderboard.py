@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import tempfile
+from dataclasses import dataclass
 from datetime import datetime, date, timedelta
 
 import paths
@@ -112,3 +113,227 @@ def record_race(species: str, track: str, finish_order_names: list[str]) -> None
     store = _load()
     store["races"].append(record)
     _save(store)
+
+
+# --- Public row types (frozen dataclasses — Tk-free, no third-party deps) ---
+
+@dataclass(frozen=True)
+class Row:
+    rank: int
+    racer_name: str
+    species: str
+    points: int
+    races: int
+    wins: int
+    podiums: int
+
+
+@dataclass(frozen=True)
+class PerTrackRow:
+    track: str
+    rank: int
+    racer_name: str
+    species: str
+    points: int
+    races: int
+    wins: int
+    podiums: int
+
+
+# --- Private query helpers ---
+
+def _races_for_window(window: str) -> list[dict]:
+    """Return the appropriate race source list for the given time window.
+
+    Session vs. disk distinction (IMPORTANT — do NOT concatenate):
+    - record_race writes to BOTH _SESSION_RACES and disk atomically.
+    - _load()["races"] therefore already contains current-session records.
+    - For "session" queries we read _SESSION_RACES only (in-process races).
+    - For all other windows we read disk only (which includes session records).
+    - Concatenating both would double-count current-session races.
+    """
+    if window == "session":
+        return list(_SESSION_RACES)
+    return _load()["races"]
+
+
+def _in_window(ts_str: str, window: str, now: datetime) -> bool:
+    """Return True if the ISO timestamp string falls within the given window."""
+    if window in ("all", "session"):
+        # "all" is unconditional; "session" callers already filtered by source list.
+        return True
+    record_date = datetime.fromisoformat(ts_str).date()
+    if window == "today":
+        return record_date == now.date()
+    if window == "week":
+        # ISO Monday-start week (CONTEXT-1 Decision 2).
+        today = now.date()
+        week_start = today - timedelta(days=today.weekday())   # Monday of current week
+        week_end_exclusive = week_start + timedelta(days=7)    # next Monday
+        return week_start <= record_date < week_end_exclusive
+    if window == "month":
+        return record_date.year == now.year and record_date.month == now.month
+    if window == "year":
+        return record_date.year == now.year
+    raise ValueError(f"unknown time_window: {window!r}")
+
+
+def _species_matches(record_species: str, species_filter: str) -> bool:
+    """True when species_filter is 'all' or matches the record's species exactly."""
+    return species_filter in ("all", record_species)
+
+
+def _aggregate(records: list[dict]) -> dict[str, dict]:
+    """Accumulate per-racer scoring stats from a filtered list of race records.
+
+    Scoring (CONTEXT-1 / ROADMAP):
+      place 0 → POINTS[0] = 6 (win)
+      place 1 → POINTS[1] = 3
+      place 2 → POINTS[2] = 1
+      place 3 → POINTS[3] = 0
+      place >= len(POINTS) → 0 (graceful — not expected in current data)
+
+    3-racer truncation: for a 3-element finish_order, enumerate yields indices
+    0/1/2 only, so POINTS[0/1/2] = 6/3/1 are used and the 0-slot (index 3)
+    is never reached. No phantom 4th-racer entry is created.
+    """
+    stats: dict[str, dict] = {}
+    for record in records:
+        for place, name in enumerate(record["finish_order"]):
+            pts = POINTS[place] if place < len(POINTS) else 0
+            if name not in stats:
+                stats[name] = {
+                    "species": record["species"],
+                    "points": 0,
+                    "races": 0,
+                    "wins": 0,
+                    "podiums": 0,
+                }
+            entry = stats[name]
+            entry["points"] += pts
+            entry["races"] += 1
+            entry["wins"] += 1 if place == 0 else 0
+            entry["podiums"] += 1 if place < 3 else 0
+            # First-seen species wins; don't reassign on subsequent records.
+    return stats
+
+
+def _sorted_rows(stats: dict[str, dict]) -> list[tuple[str, dict]]:
+    """Return (name, stat) pairs sorted by (-points, -wins, -podiums, name)."""
+    return sorted(
+        stats.items(),
+        key=lambda item: (
+            -item[1]["points"],
+            -item[1]["wins"],
+            -item[1]["podiums"],
+            item[0],   # name ascending as final tiebreaker
+        ),
+    )
+
+
+# --- Public read/query surface ---
+
+def query(
+    time_window: str,
+    species_filter: str = "all",
+    track_filter: str = "all",
+    *,
+    now: datetime | None = None,
+) -> list[Row]:
+    """Return ranked leaderboard rows for the given filters.
+
+    Args:
+        time_window: one of "all", "session", "today", "week", "month", "year".
+        species_filter: "all", "turtles", or "snakes".
+        track_filter: "all" or a specific track name; unknown names return [].
+        now: injected datetime for test-time override (CONTEXT-1 Decision 4).
+             Production callers omit this — it defaults to datetime.now().
+    """
+    if now is None:
+        now = datetime.now()
+    records = _races_for_window(time_window)
+    filtered = [
+        r for r in records
+        if _in_window(r["ts"], time_window, now)
+        and _species_matches(r["species"], species_filter)
+        and (track_filter == "all" or r["track"] == track_filter)
+    ]
+    if not filtered:
+        return []
+    stats = _aggregate(filtered)
+    sorted_pairs = _sorted_rows(stats)
+    return [
+        Row(
+            rank=i + 1,
+            racer_name=name,
+            species=stat["species"],
+            points=stat["points"],
+            races=stat["races"],
+            wins=stat["wins"],
+            podiums=stat["podiums"],
+        )
+        for i, (name, stat) in enumerate(sorted_pairs)
+    ]
+
+
+def query_per_track(
+    time_window: str,
+    species_filter: str = "all",
+    *,
+    now: datetime | None = None,
+) -> list[PerTrackRow]:
+    """Return per-track ranked rows; rank resets to 1 within each track group.
+
+    Track groups are returned in sorted(track) order (alphabetical ascending).
+
+    Args:
+        time_window: one of "all", "session", "today", "week", "month", "year".
+        species_filter: "all", "turtles", or "snakes".
+        now: injected datetime for test-time override (CONTEXT-1 Decision 4).
+             Production callers omit this — it defaults to datetime.now().
+    """
+    if now is None:
+        now = datetime.now()
+    records = _races_for_window(time_window)
+    filtered = [
+        r for r in records
+        if _in_window(r["ts"], time_window, now)
+        and _species_matches(r["species"], species_filter)
+    ]
+    if not filtered:
+        return []
+    # Group records by track.
+    by_track: dict[str, list[dict]] = {}
+    for r in filtered:
+        by_track.setdefault(r["track"], []).append(r)
+    result: list[PerTrackRow] = []
+    for track_name in sorted(by_track):
+        group_stats = _aggregate(by_track[track_name])
+        sorted_pairs = _sorted_rows(group_stats)
+        for rank_within, (name, stat) in enumerate(sorted_pairs, start=1):
+            result.append(
+                PerTrackRow(
+                    track=track_name,
+                    rank=rank_within,
+                    racer_name=name,
+                    species=stat["species"],
+                    points=stat["points"],
+                    races=stat["races"],
+                    wins=stat["wins"],
+                    podiums=stat["podiums"],
+                )
+            )
+    return result
+
+
+def known_tracks() -> list[str]:
+    """Return a sorted, deduplicated list of track names from race history.
+
+    Sources: union of on-disk races and current-session races (CONTEXT-1 Decision 5).
+    Set semantics deduplicate the overlap (session races appear in both sources
+    because record_race writes to disk; the union is idempotent).
+    Never imports tracks.py or constants.py — purely history-driven.
+    """
+    disk_tracks = {r["track"] for r in _load()["races"]}
+    session_tracks = {r["track"] for r in _SESSION_RACES}
+    return sorted(disk_tracks | session_tracks)
