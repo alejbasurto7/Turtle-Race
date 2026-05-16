@@ -141,33 +141,35 @@ def draw_turtle_shape(t):
     t.shape("turtle")
 
 
-# Custom snake polygon — Nokia-retro-snake-inspired silhouette.
-# Head at +y (apex), tail at -y. Length 18 along heading, max width 6.
-# Body has 3 visible bulges per side suggesting segmented undulation;
-# head has a slight wider jaw; tail tapers to a point.
+# Custom snake polygon — smooth-wave silhouette (Option 5 from
+# tools/snake_shape_options.py). Constant-width body strip whose
+# centerline shifts +2/-2 in x at alternating y levels, producing a
+# sinusoidal-feeling zigzag without sharp triangular peaks.
+# Head at +y (apex), tail at -y. Length 20 along heading, max width 4.
 _SNAKE_POLYGON = (
-    # Head + right side, top to bottom
-    ( 0, 10),     # head apex
-    ( 3,  8),     # head right
-    ( 3,  6),     # jaw right
-    ( 1,  4),     # neck pinch right
-    ( 3,  2),     # body bulge right (segment 1)
-    ( 1,  0),     # body waist
-    ( 3, -2),     # body bulge right (segment 2)
-    ( 1, -4),     # body waist
-    ( 1, -6),     # tail right
+    # Head
+    ( 0, 12),     # head apex
+    ( 3, 11),     # head right
+    ( 3,  9),     # jaw right
+    # Right edge — centerline alternates +2/-2 → body strip slants L-R-L-R
+    ( 4,  7),     # R at y=7  (centerline+2)
+    ( 0,  4),     # R at y=4  (centerline-2)
+    ( 4,  1),     # R at y=1  (centerline+2)
+    ( 0, -2),     # R at y=-2 (centerline-2)
+    ( 4, -5),     # R at y=-5 (centerline+2)
+    ( 1, -7),     # tail right
     ( 0, -8),     # tail tip
-    # Left side, bottom to top
-    (-1, -6),     # tail left
-    (-1, -4),     # body waist
-    (-3, -2),     # body bulge left (segment 2)
-    (-1,  0),     # body waist
-    (-3,  2),     # body bulge left (segment 1)
-    (-1,  4),     # neck pinch left
-    (-3,  6),     # jaw left
-    (-3,  8),     # head left
+    # Left edge (mirror)
+    (-1, -7),
+    ( 0, -5),     # L at y=-5
+    (-4, -2),     # L at y=-2
+    ( 0,  1),     # L at y=1
+    (-4,  4),     # L at y=4
+    ( 0,  7),     # L at y=7
+    (-3,  9),     # jaw left
+    (-3, 11),     # head left
 )
-_SNAKE_POLYGON_LENGTH = 18   # length axis of _SNAKE_POLYGON (10 - (-8))
+_SNAKE_POLYGON_LENGTH = 20   # length axis of _SNAKE_POLYGON (12 - (-8))
 _snake_shape_registered = False
 
 
@@ -181,8 +183,8 @@ def draw_snake_shape(t, length_units):
       each snake's SNAKE_LENGTHS entry)
 
     Produces visually distinct lengths: Shadow (6) > Anaconda (5) > Ralph (2),
-    at a 6:5:2 ratio. At L_BASE=1.2 and the polygon's 18-unit length axis,
-    Shadow ≈ 130 px along heading, Anaconda ≈ 108 px, Ralph ≈ 43 px.
+    at a 6:5:2 ratio. At L_BASE=1.2 and the polygon's 20-unit length axis,
+    Shadow ≈ 144 px along heading, Anaconda ≈ 120 px, Ralph ≈ 48 px.
     """
     global _snake_shape_registered
     if not _snake_shape_registered:
