@@ -151,3 +151,6 @@
 - Audit: CLEAN. Simplification: NO_FINDINGS. Documentation: NO_GAPS (one stale inline comment caught + fixed)
 - **All 5 phases COMPLETE.** Snakes Racer Mode milestone is ready for `/shipyard:ship`
 - Manual final smoke: PENDING_HUMAN_VERIFICATION (lightweight sanity-check; not blocking per CONTEXT-5 since iterative Phase 4 smoke already confirmed end-state)
+
+## Quick Task 001 (2026-05-16)
+Quick task 001: Shuffled MIDI playlist soundtrack (complete) — audio.py rewritten to play `assets/midi/*.mid` in shuffled order, looping forever via a daemon polling thread; 85/85 tests still pass.

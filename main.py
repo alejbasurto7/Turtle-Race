@@ -12,7 +12,7 @@ import race
 
 def main():
     race.make_screen()
-    audio.start_background_music("assets/TeenageMutantNinjaTurtles.mid")
+    audio.start_background_music()
     screen = race.get_screen()
 
     keep_playing = True
