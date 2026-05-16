@@ -133,7 +133,7 @@ Phases are ordered by dependency. Each phase ends with a verifiable checkpoint s
 
 ---
 
-## Phase 5 — Regression sweep, frozen build, visual polish
+## Phase 5 — Regression sweep, frozen build, visual polish  ✅ COMPLETE (2026-05-16)
 
 **Goal:** Full test run, full manual smoke matrix, frozen-exe verification, and visual cleanup of any spiral-3-lane or `L_BASE` issues flagged in Phase 4.
 

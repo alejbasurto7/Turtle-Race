@@ -1,7 +1,7 @@
 {
   "phase": 5,
-  "position": "Phase 5 planned, ready for build",
-  "status": "planned",
-  "message": "Phase 5 plans written: coverage PASS, critique READY (CLAUDE.md scope expanded to 3 fixes)",
+  "position": "All 5 phases COMPLETE — milestone ready to ship",
+  "status": "complete",
+  "message": "Snakes Racer Mode milestone complete: 85/85 tests, pyinstaller build OK (42.8 MB), all carry-overs resolved or formally deferred; ready for /shipyard:ship",
   "updated_at": "2026-05-16T00:00:00Z"
 }

@@ -140,3 +140,14 @@
 - Coverage verifier: PASS. Critique verifier: stalled — CRITIQUE.md written inline. Verdict: READY with note that CLAUDE.md needs 3 fixes (snake polygon length 9→20, podium width 2.0→3.0, missing HEAD-at-start docs) instead of the 1 RESEARCH flagged. Builder should expand PLAN-1.1 Task 2 scope.
 - Pytest baseline confirmed: 84 tests. Anaconda → 85.
 - Ready for `/shipyard:build 5` — the final build
+
+## 2026-05-16 — Phase 5 built and verified (MILESTONE COMPLETE)
+
+- 2 sequential plans; all gates passed
+- Wave 1 PLAN-1.1: 3 atomic commits (gitignore + Anaconda test + create_racers docstring; PROJECT.md + CLAUDE.md fixes; SHIP-NOTES.md). Verdict PASS. CLAUDE.md scope was expanded mid-flight per CRITIQUE.md to 3 fixes (snake polygon length 9→20, podium width 2.0→3.0, HEAD-at-start placement note) — all landed
+- Wave 2 PLAN-2.1: verification-only, no source commits. pytest 85/85, banned-identifier grep clean (only the intentional tests/test_tracks.py:38 prose comment), PyInstaller 6.20.0 build exit 0 → dist/TurtleRace.exe (~42.8 MB)
+- Build commits: 207f0e3, 96c9ed3, dae6b79 (Wave 1) + 1 post-build polish commit fixing race.py:200 stale comment caught by documenter
+- Test count progression across the milestone: 54 → 76 → 77 → 84 → 85 (all green throughout)
+- Audit: CLEAN. Simplification: NO_FINDINGS. Documentation: NO_GAPS (one stale inline comment caught + fixed)
+- **All 5 phases COMPLETE.** Snakes Racer Mode milestone is ready for `/shipyard:ship`
+- Manual final smoke: PENDING_HUMAN_VERIFICATION (lightweight sanity-check; not blocking per CONTEXT-5 since iterative Phase 4 smoke already confirmed end-state)

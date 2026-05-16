@@ -197,7 +197,7 @@ def draw_snake_shape(t, length_units):
 # Per-shape "natural length" along heading axis, used by run_race's
 # head-position finish detection. The classic and turtle shapes are ~9 units
 # (turtle is approximate but symmetric race outcome makes it harmless); the
-# custom snake polygon is 18 units long.
+# custom snake polygon length is _SNAKE_POLYGON_LENGTH (= 20).
 _SHAPE_UNIT_SIZE = {
     "turtle": 9,
     "classic": 9,
