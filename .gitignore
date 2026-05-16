@@ -5,4 +5,3 @@ __pycache__/
 *.pyo
 .pytest_cache/
 .vscode/launch.json
-assets/midi/

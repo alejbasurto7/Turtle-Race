@@ -10,6 +10,7 @@
 - N-parameterized lane geometry on all 3 tracks (oval, rectangular, spiral)
 - Podium supports 3 or 4 finishers; snake lengths preserved in podium display
 - Snake PNGs bundled in PyInstaller spec under `assets/snakes/`
+- **Shuffled MIDI playlist soundtrack** (post-milestone scope creep via quick-task 001): `audio.py` builds a randomized playlist from `assets/midi/*.mid` at startup; tracks rotate sequentially in a background thread, reshuffle when exhausted. 9 MIDI files bundled.
 
 ## Architecture Pointers
 
@@ -32,16 +33,16 @@ See CLAUDE.md for full command reference. Quick reference:
 ## Known Deferrals
 
 - **Spiral 3-lane visual tuning:** Snake mode on the spiral track ships as-is. Open a follow-up plan if the geometry looks off in production use.
-- **MIDI shuffle:** `assets/midi/` has 9 alternate MIDI files; intentionally untracked (gitignored). The active track (`assets/TeenageMutantNinjaTurtles.mid`) is at the `assets/` root and is tracked.
 
-## Snake Assets
+## Snake & Audio Assets
 
-Snake PNGs (`assets/snakes/Shadow.png`, `Ralph.png`, `Anaconda.png`) are user-provided 1024x1024 RGBA images. They are bundled in the PyInstaller spec via the `assets/snakes/*.png` glob entry. The `assets/midi/` directory of alternate soundtracks is gitignored and not bundled.
+Snake PNGs (`assets/snakes/Shadow.png`, `Ralph.png`, `Anaconda.png`) are user-provided 1024x1024 RGBA images. They are bundled in the PyInstaller spec via the `assets/snakes/*.png` glob entry.
+
+The shuffled MIDI playlist lives in `assets/midi/` (9 `.mid` files). All are tracked and bundled via the `assets/midi/*.mid` glob entry. The original single-track soundtrack (`assets/TeenageMutantNinjaTurtles.mid`) is still at the `assets/` root and tracked, but `audio.py` no longer loads it directly — the playlist builder picks it up alongside the others if it lives in `assets/midi/`.
 
 ## Future Work Suggestions
 
 - 4th species (lizards, frogs) via the `SPECIES` config pattern — no core changes required
-- Music shuffle from `assets/midi/` alternates
 - Per-round statistics or win-streak tracking
 - Difficulty slider (MAX_PACE tuning) exposed via a dialog
 - macOS/Linux packaging (PyInstaller spec is Windows-targeted)
