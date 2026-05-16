@@ -337,3 +337,30 @@ def known_tracks() -> list[str]:
     disk_tracks = {r["track"] for r in _load()["races"]}
     session_tracks = {r["track"] for r in _SESSION_RACES}
     return sorted(disk_tracks | session_tracks)
+
+
+# --- Public reset surface ---
+
+def reset_session() -> None:
+    """Clear in-memory session races only; on-disk file is untouched.
+
+    After this call:
+    - query("session") returns []
+    - query("all") still returns all historic records (disk unchanged)
+    - known_tracks() may still include tracks from _load() (disk unchanged)
+    """
+    _SESSION_RACES.clear()
+
+
+def reset_all() -> None:
+    """Wipe both the in-memory session and the on-disk JSON file.
+
+    Uses the same atomic write helper as record_race — no separate code path.
+    After this call:
+    - _SESSION_RACES is []
+    - The file on disk exists and contains {"schema_version": 1, "races": []}
+    - query("all") returns []
+    - known_tracks() returns []
+    """
+    _SESSION_RACES.clear()
+    _atomic_write_json(_empty_store(), _path())
