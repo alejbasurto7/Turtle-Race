@@ -206,6 +206,25 @@ _SHAPE_UNIT_SIZE = {
 
 # Resolves the string sentinel in SPECIES[species]["shape_drawer"] to a
 # callable. Keyed by the same string values used in constants.SPECIES.
+def _head_offset_arc_for(t):
+    """Visual head-offset (px along heading) for a racer with shape t.shape()."""
+    shape_name = t.shape()
+    unit_size = _SHAPE_UNIT_SIZE.get(shape_name, 9)
+    stretch_len = t.shapesize()[1]
+    return unit_size * stretch_len / 2
+
+
+def _back_pos(x, y, heading_deg, distance):
+    """Return (x, y) shifted backwards by `distance` along the heading.
+
+    Used to place a racer's CENTER behind a target point so its HEAD
+    (which extends head_offset_arc forward along heading) sits at the
+    target. Keeps long snakes from straddling the start/finish line.
+    """
+    rad = math.radians(heading_deg)
+    return x - distance * math.cos(rad), y - distance * math.sin(rad)
+
+
 _SHAPE_DRAWERS = {
     "turtle": draw_turtle_shape,
     "snake":  draw_snake_shape,
@@ -251,7 +270,12 @@ def place_racers_on_track(racers, track_name):
         racer['o'].color(racer['color'])
         racer['o'].penup()
         racer['o'].setheading(heading)
-        racer['o'].goto(x, y)
+        # Place the CENTER behind the start line by head_offset so the
+        # racer's HEAD sits at the lane start position. Without this,
+        # long snakes straddle the start line (half their body behind).
+        head_off = _head_offset_arc_for(racer['o'])
+        back_x, back_y = _back_pos(x, y, heading, head_off)
+        racer['o'].goto(back_x, back_y)
         racer['o'].showturtle()
     _screen.update()
     _screen.tracer(1)
@@ -303,13 +327,12 @@ def run_race(racers, track_name, user_bet):
     # loop uses ``coast_remaining[i] is None`` to decide which branch to enter
     # rather than comparing progress against shared_distance directly.
     # This is simpler than lowering the clamp and avoids off-by-one edge cases.
+    head_offset_arc = []
     head_offset_progress = []
     for i in range(len(racers)):
-        shape_name = racers[i]['o'].shape()
-        unit_size = _SHAPE_UNIT_SIZE.get(shape_name, 9)
-        stretch_len = racers[i]['o'].shapesize()[1]
-        head_offset_arc = unit_size * stretch_len / 2
-        head_offset_progress.append(head_offset_arc * (shared_distance / lane_lengths[i]))
+        arc_off = _head_offset_arc_for(racers[i]['o'])
+        head_offset_arc.append(arc_off)
+        head_offset_progress.append(arc_off * (shared_distance / lane_lengths[i]))
 
     print(f"\n=== Race start: {track_name} ===")
     print(f"  shared_distance (progress target, equal for all lanes): {shared_distance:.1f}")
@@ -344,8 +367,11 @@ def run_race(racers, track_name, user_bet):
                 fraction = progress[i] / shared_distance
                 arc = fraction * lane_lengths[i]
                 x, y, heading = tracks.position_at_arc(lane_paths[i], arc)
+                # Back the visual up by head_offset_arc so the HEAD tracks
+                # the lane arc position (matches the head-position finish check).
+                back_x, back_y = _back_pos(x, y, heading, head_offset_arc[i])
                 turtle['o'].setheading(heading)
-                turtle['o'].goto(x, y)
+                turtle['o'].goto(back_x, back_y)
                 # Head-position finish: the racer's head crosses the line when
                 # progress reaches shared_distance - head_offset_progress[i].
                 # For turtles this is ~4.5 progress units earlier than center;
