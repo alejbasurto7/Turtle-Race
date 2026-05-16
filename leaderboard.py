@@ -4,7 +4,7 @@ import sys
 import tempfile
 from datetime import datetime, date, timedelta
 
-from paths import user_data_path
+import paths
 
 
 # --- Constants ---
@@ -24,7 +24,9 @@ _SESSION_RACES: list[dict] = []   # populated by record_race; resets on import
 def _path() -> str:
     # Wrapped in a function (not a module-level constant) so that
     # monkeypatching paths.user_data_path in tests takes effect on every call.
-    return user_data_path(_FILENAME)
+    # Must call paths.user_data_path through the module (not a local alias)
+    # so monkeypatch.setattr("paths.user_data_path", ...) intercepts it.
+    return paths.user_data_path(_FILENAME)
 
 
 def _empty_store() -> dict:
