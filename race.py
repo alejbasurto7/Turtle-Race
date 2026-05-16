@@ -247,6 +247,12 @@ def create_racers(species: str):
         - ``'color'``: str — pen/fill color (matches
           ``SPECIES[species]["colors"][i]``).
         - ``'o'``:     turtle.Turtle — the underlying turtle object.
+
+    Note:
+        For ``"snakes"``, the drawer receives ``SNAKE_LENGTHS[i]`` as a
+        ``length_units`` argument so each snake's stretch_len scales with
+        its species-defined length (Shadow=6, Ralph=2, Anaconda=5).
+        For ``"turtles"``, the drawer takes no extra argument.
     """
     data = SPECIES[species]
     drawer = _SHAPE_DRAWERS[data["shape_drawer"]]

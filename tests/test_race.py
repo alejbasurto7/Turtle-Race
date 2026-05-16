@@ -106,6 +106,19 @@ def test_head_offset_arc_ralph():
         f"Ralph head_offset_arc: expected 24.0, got {head_offset_arc}"
     )
 
+
+def test_head_offset_arc_anaconda():
+    """Anaconda: L_BASE=1.2, length_units=5 → stretch_len=6.0.
+    Snake polygon SNAKE_UNIT_SIZE=20.
+    head_offset_arc = 20 * 6.0 / 2 = 60.0 px along heading.
+    """
+    stretch_len = 1.2 * 5   # 6.0
+    head_offset_arc = SNAKE_UNIT_SIZE * stretch_len / 2
+    assert abs(head_offset_arc - 60.0) < 1e-9, (
+        f"Anaconda head_offset_arc: expected 60.0, got {head_offset_arc}"
+    )
+
+
 # Note (no assertion): for turtles with stretch_len = 1.0 (default shapesize),
 # head_offset_arc = 9 * 1.0 / 2 = 4.5 px. Applied equally to all 4 turtles, so
 # the race ranking and visual feel are unchanged — correctness verified by smoke
