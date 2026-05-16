@@ -128,3 +128,15 @@
 - Audit: CLEAN. Simplification: LOW_PRIORITY (most carry-overs from prior phases either fixed in Phase 4 or noted; _SHAPE_UNIT_SIZE lifted to module-level as part of refactor). Documentation: MINOR_GAPS addressed via the cff68e1 CLAUDE.md update
 - **Manual smoke iterations: PASSED** — user confirmed snakes look snake-like (smooth wave silhouette), scale correctly, podium displays preserve length ratio, and HEAD-at-start placement looks right
 - Ready for `/shipyard:plan 5`
+
+## 2026-05-16 — Phase 5 planned
+
+- CONTEXT-5.md locks lean wrap-up scope: spiral 3-lane tuning DEFERRED, MIDI files LEFT UNTRACKED (add to .gitignore), PyInstaller BUILD-ONLY (no frozen-exe smoke), polish = Anaconda test + create_racers docstring (defer winner_racer helper)
+- RESEARCH.md: file paths, line numbers, content sketches for SHIP-NOTES.md, PROJECT.md Open Items strikethrough plan, CLAUDE.md drift check
+- Researcher again returned content inline citing "role boundary" — RESEARCH.md written inline from output
+- 2 plans (sequential):
+  - PLAN-1.1: 3 tasks — gitignore+Anaconda test+race.py docstring; PROJECT.md+CLAUDE.md; SHIP-NOTES.md
+  - PLAN-2.1: 3 verification tasks — pytest 85/85, banned-identifier grep, pyinstaller build
+- Coverage verifier: PASS. Critique verifier: stalled — CRITIQUE.md written inline. Verdict: READY with note that CLAUDE.md needs 3 fixes (snake polygon length 9→20, podium width 2.0→3.0, missing HEAD-at-start docs) instead of the 1 RESEARCH flagged. Builder should expand PLAN-1.1 Task 2 scope.
+- Pytest baseline confirmed: 84 tests. Anaconda → 85.
+- Ready for `/shipyard:build 5` — the final build
