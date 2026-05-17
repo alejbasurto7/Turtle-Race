@@ -14,7 +14,7 @@ The feature extends the existing round loop without changing the race mechanics.
 
 1. Award points to racers based on finishing position (6 / 3 / 1 / 0 for 1st / 2nd / 3rd / 4th) every time a race completes.
 2. Persist race results across app sessions so historic stats survive restarts.
-3. Let the user view a leaderboard table filtered by **time window** (Current Session, Today, This Week, This Month, This Year, All Time), **species** (Snakes, Turtles, All), and **track** (All Tracks, or any specific named track), with a separate **per-track breakdown** view that shows each racer's stats broken out by which track they ran on.
+3. Let the user view a leaderboard table filtered by **time window** (Current Session, Today, This Week, This Month, This Year, All Time), **species** (Snakes, Turtles, All), and **track** (All Tracks, or any specific named track), plus a **Group by** filter (None or Track) that reshapes the same table into a per-track breakdown when set to Track.
 4. Give the user explicit ways to clear stats: a **Reset Session** button (clears only the current in-memory session) and a **Reset All** button (wipes the historic JSON file).
 5. Reach the leaderboard from a new main-menu screen at app startup, without disrupting the fast "race-then-race-again" loop.
 
@@ -66,13 +66,13 @@ The feature extends the existing round loop without changing the race mechanics.
 ### Functional — UI
 
 - **Main menu screen** (`get_main_menu_choice()` in [dialogs.py](dialogs.py)) at app entry — Toplevel over the lawn background with three buttons: **Race**, **View Leaderboard**, **Quit**. Returns the user's choice.
-- **Leaderboard window** (`show_leaderboard()`) — Toplevel with:
-  - A `ttk.Notebook` with two tabs: **Overall** and **Per Track**.
-  - **Overall tab:** three `ttk.Combobox` filters at top (Time, Species, Track), and a `ttk.Treeview` with columns Rank, Racer, Points, Races, Wins, Podiums.
-  - **Per Track tab:** two `ttk.Combobox` filters at top (Time, Species — no Track filter here, since this tab is itself a breakdown by track), and a `ttk.Treeview` with columns Track, Rank-in-track, Racer, Points, Races, Wins, Podiums. Rows are grouped by track (sorted alphabetically by track name) with ranks restarted within each track.
-  - Three bottom buttons shared across tabs: **Reset Session**, **Reset All**, **Close**. Both reset buttons require a confirmation dialog before acting.
-  - Changing any filter immediately re-queries and repopulates the active tab's Treeview (no explicit Refresh button).
-  - Filter state is per-tab; switching tabs preserves each tab's own filters.
+- **Leaderboard window** (`show_leaderboard()`) — single Toplevel (no Notebook) with:
+  - Four `ttk.Combobox` filters at top: **Time**, **Species**, **Track**, and **Group by** (`None | Track`). Defaults: `All Time`, `All`, `All Tracks`, `None`.
+  - One `ttk.Treeview` below the filters. When **Group by = None**, columns are Rank, Racer, Points, Races, Wins, Podiums. When **Group by = Track**, columns are Track, Rank-in-track, Racer, Points, Races, Wins, Podiums (grouped by track name, alphabetical, with ranks restarting per track).
+  - When **Group by = Track** is selected, the **Track filter is automatically disabled (greyed out)** — grouping already organizes by every track, so the Track filter would be redundant. Selecting `Group by = None` re-enables it.
+  - When the filtered result is empty, an inline label below the filter row shows `No races recorded` (hides automatically when the result becomes non-empty).
+  - Three bottom buttons: **Reset Session**, **Reset All**, **Close**. Both reset buttons use `tkinter.messagebox.askyesno` to confirm (default focus on No). Confirmation copy: Reset Session → `"Clear current session stats?"`; Reset All → `"Delete all race history? This cannot be undone."`
+  - Changing any filter immediately re-queries and repopulates the Treeview (no explicit Refresh button).
 - **Post-race prompt** (`ask_play_again_choice()`) — replaces the current `messagebox.askyesno`. Three buttons: **Play Again**, **Main Menu**, **Quit**. Returns the chosen action.
 - All new dialogs follow the existing pattern: `Toplevel` + `grab_set()` + `wait_window()` + `WM_DELETE_WINDOW` no-op to force a deliberate choice.
 
@@ -99,7 +99,7 @@ The feature extends the existing round loop without changing the race mechanics.
 
 1. Running the game opens the main menu first; choosing **Race** flows through the existing track → species → bet → race → podium sequence unchanged from the user's perspective.
 2. After each race, the user can pick **Play Again** / **Main Menu** / **Quit**; the choice routes correctly.
-3. From the main menu, **View Leaderboard** opens a window with **Overall** and **Per Track** tabs. The Overall tab shows correct racers/points/races/wins/podiums for the selected time × species × track filter; the Per Track tab shows the same stats broken out by track (one Treeview group per track) for the selected time × species filter.
+3. From the main menu, **View Leaderboard** opens a single-window view (no Notebook). Four filter combos (Time, Species, Track, Group by) drive a single Treeview. When `Group by = None`, the table shows the standard ranked leaderboard (Rank/Racer/Points/Races/Wins/Podiums). When `Group by = Track`, the same Treeview reshapes to a per-track breakdown (Track/Rank-in-track/Racer/...) with the Track filter automatically disabled. Filter changes immediately re-query and repopulate the table.
 4. Restarting the app preserves historic data; the "Current Session" filter shows only races run since the latest start.
 5. Points are awarded correctly for both 3-racer (snake) and 4-racer (turtle) races; the 4th-place 0-point slot is consumed only when a 4th finisher exists.
 6. **Reset Session** clears in-memory session stats but historic data survives; **Reset All** wipes both, after a confirmation dialog.
