@@ -79,6 +79,10 @@ The background image is stashed on `canvas._bg_photo`. Preserve this pattern whe
 
 ### Round loop shape
 
-The outer `while keep_playing` loop in [main.py](main.py) is the round loop. Each round flows: `set_background()` → `get_user_track()` → `get_user_species()` → `create_racers(species)` → place/draw → `get_user_bet(species)` → `run_race(racers, ...)` → `show_podium` → `celebrate` → `announce_result` → `ask_play_again()`.
+`main()` uses a **two-level loop**. The **outer loop** iterates the main menu (`dialogs.get_main_menu_choice()` returns `"race" | "leaderboard" | "quit"`); the **inner loop** iterates race rounds when `"race"` is chosen.
+
+`running` (outer) and `in_round_loop` (inner) are the sentinel booleans. **Quit** from the post-race prompt (`dialogs.ask_play_again_choice()` → `"quit"`) sets BOTH False so the outer loop exits cleanly without re-entering the menu — this is intentional; `audio.stop_background_music()` and `screen.bye()` must run exactly once on the way out.
+
+Each race round flows: `screen.clear()` → `set_background()` → `get_user_track()` → `get_user_species()` → `create_racers(species)` → place/draw → `get_user_bet(species)` → `run_race(racers, ...)` → `leaderboard.record_race(species, track_name, finish_order_names)` → `show_podium` → `celebrate` → `announce_result` → `ask_play_again_choice()`.
 
 The race loop itself lives in `race.run_race(...)`. It advances every racer along its lane path by a fraction of `shared_distance` per tick (so longer lanes like the spiral don't auto-lose), detects finishers, and runs a fixed `COAST_TICKS` post-finish coast for visual polish. No `is_race_on` boolean, no `cheat_mode` branch — those were removed during the Phase 2 generalization.

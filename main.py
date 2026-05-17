@@ -12,6 +12,10 @@ import race
 
 
 def main():
+    # Two-level loop: outer iterates the main menu; inner iterates race rounds.
+    # `running` controls the outer loop; `in_round_loop` controls the inner loop.
+    # Quit from the post-race prompt sets both False so the outer loop exits
+    # cleanly without re-entering the menu — audio.stop and screen.bye run once.
     race.make_screen()
     audio.start_background_music()
     screen = race.get_screen()
@@ -21,6 +25,11 @@ def main():
     running = True
     while running:
         choice = dialogs.get_main_menu_choice()
+        # Defensive guard: the dialog can only return one of these three under
+        # normal Tk lifecycle; an unexpected value indicates external root
+        # destruction (e.g. Task Manager kill) — fail fast rather than silently
+        # falling through to the race branch.
+        assert choice in ("race", "leaderboard", "quit"), f"unexpected menu choice: {choice!r}"
         if choice == "quit":
             running = False
             break
