@@ -7,6 +7,7 @@ except Exception:
 
 import audio
 import dialogs
+import leaderboard
 import race
 
 
@@ -36,6 +37,9 @@ def main():
         user_bet = dialogs.get_user_bet(species)
 
         winning_turtle, finish_order = race.run_race(racers, track_name, user_bet)
+
+        finish_order_names = [racers[i]['name'] for i in finish_order]
+        leaderboard.record_race(species, track_name, finish_order_names)
 
         user_won = winning_turtle is racers[user_bet - 1]['o']
         race.show_podium(racers, finish_order)
