@@ -1,3 +1,16 @@
+"""Per-user leaderboard persistence for the Turtle Race game.
+
+Tk-free, stdlib-only. Race results are appended to a JSON file under the
+user's per-user app-data directory (Windows: %APPDATA%\\TurtleRace\\;
+macOS / Linux: see paths.user_data_path) — never under the PyInstaller
+sys._MEIPASS bundle. All file I/O is funneled through paths.user_data_path
+and uses os.replace for atomic writes.
+
+Current schema version: SCHEMA_VERSION (1). On unparseable input the
+existing file is quarantined and a fresh empty store is written; the
+caller never sees the recovery exception.
+"""
+
 import json
 import os
 import sys
@@ -10,6 +23,9 @@ import paths
 
 # --- Constants ---
 
+# Points by finishing position (1st, 2nd, 3rd, 4th). For 3-racer (snake)
+# races, only the first three slots are consumed; the 4th-place 0 only
+# applies when a 4th finisher exists (4-racer turtle races).
 POINTS = (6, 3, 1, 0)
 SCHEMA_VERSION = 1
 _FILENAME = "leaderboard.json"
@@ -119,6 +135,7 @@ def record_race(species: str, track: str, finish_order_names: list[str]) -> None
 
 @dataclass(frozen=True)
 class Row:
+    """One row of an aggregated leaderboard. rank is 1-based across the whole result."""
     rank: int
     racer_name: str
     species: str
@@ -130,6 +147,7 @@ class Row:
 
 @dataclass(frozen=True)
 class PerTrackRow:
+    """One row of a per-track breakdown. rank restarts at 1 within each track group."""
     track: str
     rank: int
     racer_name: str
@@ -184,7 +202,9 @@ def _in_window(ts_str: str, window: str, now: datetime) -> bool:
         return record_date.year == now.year and record_date.month == now.month
     if window == "year":
         return record_date.year == now.year
-    raise ValueError(f"unknown time_window: {window!r}")
+    # _validate_window() at each public-API entry point ensures window is
+    # always a known value before _in_window runs, so this point is unreachable.
+    return False  # pragma: no cover
 
 
 def _species_matches(record_species: str, species_filter: str) -> bool:

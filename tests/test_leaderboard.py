@@ -175,7 +175,6 @@ def test_module_is_tk_free():
 
 def _seed(lb, *records):
     """Write a list of (ts_iso, species, track, finish_order_list) records directly to disk."""
-    import json
     store = {"schema_version": 1, "races": [
         {"ts": ts, "species": s, "track": t, "finish_order": list(fo)}
         for (ts, s, t, fo) in records
