@@ -366,5 +366,38 @@ def ask_play_again_choice() -> str:
     return selected[0]
 
 
+def show_leaderboard_placeholder() -> None:
+    """Show a placeholder Toplevel modal informing the user that the leaderboard view
+    is coming in Phase 4. Single Close button; X-button is equivalent to Close.
+
+    Phase 4 will replace this function's body in-place with the real Treeview-based
+    leaderboard view. The name and signature MUST stay stable so Plan 2.1 can wire
+    main.py against it now.
+    """
+    dialog = tkinter.Toplevel()
+    dialog.title("Leaderboard")
+    dialog.resizable(False, False)
+
+    label = tkinter.Label(
+        dialog,
+        text="Leaderboard view coming in Phase 4",
+        padx=30, pady=20,
+    )
+    label.pack()
+
+    def close():
+        dialog.destroy()
+
+    close_btn = tkinter.Button(dialog, text="Close", width=12, command=close)
+    close_btn.pack(padx=20, pady=(0, 20))
+    close_btn.focus_set()
+
+    dialog.protocol("WM_DELETE_WINDOW", close)  # X is equivalent to Close (CONTEXT-3 Decision 2).
+
+    dialog.transient()
+    dialog.grab_set()
+    dialog.wait_window()
+
+
 def ask_play_again():
     return tkinter.messagebox.askyesno("Turtle Race", "Do you want to play again?")
