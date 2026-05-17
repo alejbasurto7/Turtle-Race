@@ -8,6 +8,19 @@ def resource_path(rel_path):
 
 
 def user_data_path(filename: str) -> str:
+    # Reject any filename containing a path separator or parent-traversal token.
+    # Callers must pass a bare basename (e.g. "leaderboard.json"); sanitization is
+    # harder to reason about than rejection, so we reject and let the caller fix
+    # the call site. Guards against accidental misuse by future callers.
+    if (
+        os.path.basename(filename) != filename
+        or filename in (".", "..")
+        or os.sep in filename
+        or (os.altsep is not None and os.altsep in filename)
+    ):
+        raise ValueError(
+            f"user_data_path requires a bare filename (no path separators or traversal), got: {filename!r}"
+        )
     # This function intentionally never references sys._MEIPASS.
     # user_data_path() is for writable per-user state (e.g. leaderboard.json),
     # not bundled read-only assets.  Writable files must never live inside the

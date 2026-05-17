@@ -88,3 +88,19 @@ def test_user_data_path_creates_parent_dir(monkeypatch, tmp_path):
     monkeypatch.setenv("XDG_DATA_HOME", str(nested))
     user_data_path("x")
     assert os.path.isdir(tmp_path / "nested" / "dir" / "TurtleRace")
+
+
+# --- Filename validation (Phase 2 basename guard) ---
+
+def test_user_data_path_rejects_path_separator():
+    with pytest.raises(ValueError):
+        user_data_path("subdir/x.txt")
+    with pytest.raises(ValueError):
+        user_data_path(f"subdir{os.sep}x.txt")
+
+
+def test_user_data_path_rejects_parent_traversal():
+    with pytest.raises(ValueError):
+        user_data_path("../evil")
+    with pytest.raises(ValueError):
+        user_data_path("..")
