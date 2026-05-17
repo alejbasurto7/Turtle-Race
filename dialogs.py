@@ -388,17 +388,23 @@ def ask_play_again_choice() -> str:
     return selected[0]
 
 
-def show_leaderboard_placeholder() -> None:
+def show_leaderboard() -> None:
     """Show the leaderboard window with four filters, a Treeview, and three buttons.
 
-    Layout (single Toplevel, no Notebook):
+    Single Toplevel modal (no Notebook). Layout:
     - Row 0: filter row — Time / Species / Track / Group by ttk.Combobox widgets.
-    - Row 1: empty-state label ("No races recorded"), hidden when rows are present.
-    - Row 2: ttk.Treeview with vertical scrollbar; columns reshape on Group by change.
+    - Row 1: inline empty-state label ("No races recorded"), shown only when the
+             filtered query returns zero rows.
+    - Row 2: ttk.Treeview with vertical scrollbar; columns reshape based on Group by
+             (None → Rank/Racer/Points/Races/Wins/Podiums;
+              Track → Track/Rank/Racer/Points/Races/Wins/Podiums).
     - Row 3: button row — Reset Session / Reset All / Close.
 
-    Filter changes immediately re-query and repopulate. Track combobox is disabled
-    when Group by = Track. Reset buttons gate behind messagebox.askyesno confirmations.
+    Filter changes immediately re-query and repopulate the Treeview. The Track
+    combobox is automatically disabled when Group by = Track (redundant then) and
+    re-enabled with its previously-selected value when Group by returns to None.
+    Reset Session and Reset All are each gated by a messagebox.askyesno confirmation
+    with default=NO. X-button is equivalent to Close (dialog.destroy).
     """
     dialog = tkinter.Toplevel()
     dialog.title("Leaderboard")
@@ -493,10 +499,26 @@ def show_leaderboard_placeholder() -> None:
 
     # --- Row 3: button row ---
     def _on_reset_session():
-        pass
+        if tkinter.messagebox.askyesno(
+            "Reset Session",
+            "Clear current session stats?",
+            default=tkinter.messagebox.NO,
+            parent=dialog,
+        ):
+            leaderboard.reset_session()
+            _refresh_track_combo()
+            _repopulate()
 
     def _on_reset_all():
-        pass
+        if tkinter.messagebox.askyesno(
+            "Reset All",
+            "Delete all race history? This cannot be undone.",
+            default=tkinter.messagebox.NO,
+            parent=dialog,
+        ):
+            leaderboard.reset_all()
+            _refresh_track_combo()
+            _repopulate()
 
     btn_frame = tkinter.Frame(dialog)
     btn_frame.grid(row=3, column=0, pady=(4, 8))

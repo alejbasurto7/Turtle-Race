@@ -34,7 +34,7 @@ def main():
             running = False
             break
         if choice == "leaderboard":
-            dialogs.show_leaderboard_placeholder()
+            dialogs.show_leaderboard()
             continue
         # choice == "race" — enter inner race-rounds loop.
         in_round_loop = True
