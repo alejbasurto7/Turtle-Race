@@ -324,5 +324,47 @@ def get_user_species():
     return selected[0]
 
 
+def ask_play_again_choice() -> str:
+    """Return "again", "menu", or "quit" — the user's post-race choice.
+
+    Toplevel modal. X-button (WM_DELETE_WINDOW) returns "menu" per CONTEXT-3 Decision 4
+    (the least-destructive close for the post-race context). Three horizontally arranged
+    buttons in order Play Again / Main Menu / Quit. Play Again receives initial keyboard focus.
+    """
+    dialog = tkinter.Toplevel()
+    dialog.title("Turtle Race")
+    dialog.resizable(False, False)
+
+    selected = [None]
+
+    def make_cb(value):
+        def cb():
+            selected[0] = value
+            dialog.destroy()
+        return cb
+
+    label = tkinter.Label(dialog, text="What would you like to do?", padx=20, pady=10)
+    label.pack()
+
+    button_row = tkinter.Frame(dialog)
+    button_row.pack(padx=20, pady=(0, 20))
+
+    again_btn = tkinter.Button(button_row, text="Play Again", width=12, command=make_cb("again"))
+    menu_btn = tkinter.Button(button_row, text="Main Menu", width=12, command=make_cb("menu"))
+    quit_btn = tkinter.Button(button_row, text="Quit", width=12, command=make_cb("quit"))
+    again_btn.pack(side="left", padx=4)
+    menu_btn.pack(side="left", padx=4)
+    quit_btn.pack(side="left", padx=4)
+    again_btn.focus_set()  # Play Again is the primary action.
+
+    dialog.protocol("WM_DELETE_WINDOW", make_cb("menu"))  # X → "menu", per CONTEXT-3 Decision 4.
+
+    dialog.transient()
+    dialog.grab_set()
+    dialog.wait_window()
+
+    return selected[0]
+
+
 def ask_play_again():
     return tkinter.messagebox.askyesno("Turtle Race", "Do you want to play again?")
