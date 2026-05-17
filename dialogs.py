@@ -10,6 +10,7 @@ from constants import (
     SNAKE_IMAGES, SPECIES, SPECIES_DIALOG_IMAGE_SIZE,
 )
 from paths import resource_path
+import leaderboard
 
 # 2×2 grid: positional order matches asset filename position hints.
 #   Leonardo (top-left)    Donatello (top-right)
@@ -27,6 +28,26 @@ _SNAKE_ROW_LAYOUT = [
     ("Ralph",    1, 1),
     ("Anaconda", 1, 2),
 ]
+
+# Maps user-facing combobox strings to leaderboard API enum values.
+# Track names are leaderboard track strings already (no entry needed here);
+# the "All Tracks" sentinel maps to "all" via explicit handling in _repopulate.
+_FILTER_LABEL_TO_KEY = {
+    # Time window
+    "All Time":        "all",
+    "Current Session": "session",
+    "Today":           "today",
+    "This Week":       "week",
+    "This Month":      "month",
+    "This Year":       "year",
+    # Species
+    "All":             "all",
+    "Turtles":         "turtles",
+    "Snakes":          "snakes",
+    # Group by
+    "None":            "none",
+    "Track":           "track",
+}
 
 
 def get_main_menu_choice() -> str:
@@ -484,17 +505,95 @@ def show_leaderboard_placeholder() -> None:
     tkinter.Button(btn_frame, text="Reset All",     width=14, command=_on_reset_all).pack(side="left", padx=6)
     tkinter.Button(btn_frame, text="Close",         width=10, command=dialog.destroy).pack(side="left", padx=6)
 
-    # --- Temporary no-op filter callbacks (replaced in Task 2) ---
+    # --- Filter callbacks ---
+
+    def _refresh_track_combo():
+        """Refresh Track combobox values from leaderboard history; preserve selection if still valid."""
+        current = dialog._track_combo.get()
+        known = leaderboard.known_tracks()
+        new_values = ["All Tracks"] + known
+        dialog._track_combo["values"] = new_values
+        if current in new_values:
+            dialog._track_combo.set(current)
+        else:
+            dialog._track_combo.set("All Tracks")
+
+    def _rebuild_columns(group_by_key):
+        """Reconfigure Treeview columns for the active group-by key."""
+        if group_by_key == "none":
+            cols = ("rank", "racer", "points", "races", "wins", "podiums")
+            dialog._tree.configure(columns=cols)
+            headings = {"rank": "Rank", "racer": "Racer", "points": "Points",
+                        "races": "Races", "wins": "Wins", "podiums": "Podiums"}
+            widths   = {"rank": 50,  "racer": 120, "points": 70,
+                        "races": 70, "wins":  70,  "podiums": 70}
+            anchors  = {"rank": "center", "racer": "w", "points": "center",
+                        "races": "center", "wins": "center", "podiums": "center"}
+        else:  # "track"
+            cols = ("track", "rank", "racer", "points", "races", "wins", "podiums")
+            dialog._tree.configure(columns=cols)
+            headings = {"track": "Track", "rank": "Rank", "racer": "Racer",
+                        "points": "Points", "races": "Races", "wins": "Wins", "podiums": "Podiums"}
+            widths   = {"track": 110, "rank": 50,  "racer": 110, "points": 70,
+                        "races": 70,  "wins": 70,  "podiums": 70}
+            anchors  = {"track": "w", "rank": "center", "racer": "w",
+                        "points": "center", "races": "center", "wins": "center", "podiums": "center"}
+        for col in cols:
+            dialog._tree.heading(col, text=headings[col])
+            dialog._tree.column(col, width=widths[col], anchor=anchors[col])
+
+    def _repopulate():
+        """Read current filter values, query leaderboard, and repopulate the Treeview."""
+        time_key    = _FILTER_LABEL_TO_KEY[dialog._time_combo.get()]
+        species_key = _FILTER_LABEL_TO_KEY[dialog._species_combo.get()]
+        group_by_key = _FILTER_LABEL_TO_KEY[dialog._group_combo.get()]
+
+        # Single delete pass before batch insert — flicker-free.
+        dialog._tree.delete(*dialog._tree.get_children())
+
+        if group_by_key == "none":
+            track_label = dialog._track_combo.get()
+            track_key   = "all" if track_label == "All Tracks" else track_label
+            rows = leaderboard.query(time_key, species_key, track_key)
+            for row in rows:
+                dialog._tree.insert("", "end", values=(
+                    row.rank, row.racer_name, row.points, row.races, row.wins, row.podiums,
+                ))
+        else:  # group_by_key == "track"
+            # Track filter is disabled; ignore its value per CONTEXT-4 Decision 2.
+            rows = leaderboard.query_per_track(time_key, species_key)
+            for row in rows:
+                dialog._tree.insert("", "end", values=(
+                    row.track, row.rank, row.racer_name, row.points, row.races, row.wins, row.podiums,
+                ))
+
+        # Toggle empty-state label.
+        if len(rows) == 0:
+            dialog._empty_label.grid()
+        else:
+            dialog._empty_label.grid_remove()
+
     def _on_filter_change(event=None):
-        pass
+        _repopulate()
 
     def _on_group_by_change(event=None):
-        _on_filter_change()
+        # 1. Read new group_by_key.
+        group_by_key = _FILTER_LABEL_TO_KEY[dialog._group_combo.get()]
+        # 2. Toggle Track combobox state; preserve selected value.
+        dialog._track_combo.configure(state="disabled" if group_by_key == "track" else "readonly")
+        # 3. Reshape columns.
+        _rebuild_columns(group_by_key)
+        # 4. Repopulate.
+        _repopulate()
 
     dialog._time_combo.bind("<<ComboboxSelected>>",    _on_filter_change)
     dialog._species_combo.bind("<<ComboboxSelected>>", _on_filter_change)
     dialog._track_combo.bind("<<ComboboxSelected>>",   _on_filter_change)
     dialog._group_combo.bind("<<ComboboxSelected>>",   _on_group_by_change)
+
+    # --- Initial population ---
+    _refresh_track_combo()
+    _repopulate()
 
     # --- Modal lifecycle ---
     dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
