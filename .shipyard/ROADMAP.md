@@ -153,7 +153,7 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 
 ---
 
-## Phase 4 — Leaderboard View
+## Phase 4 — Leaderboard View — ✅ COMPLETE
 
 **Goal:** Implement the real `show_leaderboard()` Toplevel as a **single-view window** (no Notebook): four filter combos (Time, Species, Track, Group by) above a single `ttk.Treeview` that reshapes its columns based on `Group by`, plus three bottom buttons (Reset Session, Reset All, Close). End-to-end feature complete.
 
@@ -162,20 +162,20 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 **Risk: MEDIUM** — `ttk.Treeview` column-reshape on `Group by` change is the primary risk vector (must reconfigure `columns`, `heading`, and `column` setup AND repopulate without flicker). The two reset confirmation dialogs use `tkinter.messagebox.askyesno` for a native, familiar UX.
 
 **Success criteria:**
-- [ ] `dialogs.show_leaderboard()` opens a `Toplevel` containing four `ttk.Combobox` filters (Time, Species, Track, Group by), one `ttk.Treeview`, an inline empty-state label, and three bottom buttons (Reset Session / Reset All / Close).
-- [ ] Combobox values: Time = `Current Session, Today, This Week, This Month, This Year, All Time`; Species = `All, Turtles, Snakes`; Track = `All Tracks` plus each value returned by `leaderboard.known_tracks()` (populated when the window opens; refreshed after any reset); Group by = `None, Track`. Defaults: `All Time`, `All`, `All Tracks`, `None`.
-- [ ] All combos are `state="readonly"` so the user cannot type custom values.
-- [ ] When `Group by = None`: Treeview has columns Rank / Racer / Points / Races / Wins / Podiums; rows come from `leaderboard.query(time, species, track)`.
-- [ ] When `Group by = Track`: Treeview has columns Track / Rank-in-track / Racer / Points / Races / Wins / Podiums; rows come from `leaderboard.query_per_track(time, species)` (no track filter applied at the query layer); rows are visually grouped by track (sorted alphabetically by track name) with ranks restarting per track.
-- [ ] When `Group by = Track` is selected, the **Track filter combobox is automatically disabled** (greyed out via `state="disabled"`). When `Group by` switches back to `None`, the Track filter is re-enabled (back to `state="readonly"`). Toggling `Group by` does not lose the Track filter's previously selected value.
-- [ ] Changing any filter immediately re-queries and repopulates the Treeview — no explicit Refresh button. Repopulation does not flicker visibly on a typical-size dataset (`delete(*get_children())` then batch `insert`).
-- [ ] When the filtered result is empty, an inline label below the filter row reads `No races recorded` and the Treeview is empty. The label is hidden when the result is non-empty.
-- [ ] **Reset Session** uses `tkinter.messagebox.askyesno("Reset Session", "Clear current session stats?")` with default focus on No. On Yes: calls `leaderboard.reset_session()`, refreshes the Track combobox values (in case session-only tracks disappear), and re-queries. Historic data on disk untouched.
-- [ ] **Reset All** uses `tkinter.messagebox.askyesno("Reset All", "Delete all race history? This cannot be undone.")` with default focus on No. On Yes: calls `leaderboard.reset_all()`, resets the Track combobox to `["All Tracks"]` only, and re-queries (table becomes empty). The JSON file is overwritten to `{schema_version: 1, races: []}`.
-- [ ] **Close** dismisses the window and returns control to the main menu.
-- [ ] Window is properly modal over the menu (`grab_set` + `wait_window` + WM_DELETE redirected to the Close handler).
-- [ ] Restarting the app preserves historic data; the **Current Session** filter shows only races run since the latest start.
-- [ ] All Phase 1–3 success criteria still hold; `pytest` remains green.
+- [x] `dialogs.show_leaderboard()` opens a `Toplevel` containing four `ttk.Combobox` filters (Time, Species, Track, Group by), one `ttk.Treeview`, an inline empty-state label, and three bottom buttons (Reset Session / Reset All / Close).
+- [x] Combobox values: Time = `Current Session, Today, This Week, This Month, This Year, All Time`; Species = `All, Turtles, Snakes`; Track = `All Tracks` plus each value returned by `leaderboard.known_tracks()` (populated when the window opens; refreshed after any reset); Group by = `None, Track`. Defaults: `All Time`, `All`, `All Tracks`, `None`.
+- [x] All combos are `state="readonly"` so the user cannot type custom values.
+- [x] When `Group by = None`: Treeview has columns Rank / Racer / Points / Races / Wins / Podiums; rows come from `leaderboard.query(time, species, track)`.
+- [x] When `Group by = Track`: Treeview has columns Track / Rank-in-track / Racer / Points / Races / Wins / Podiums; rows come from `leaderboard.query_per_track(time, species)` (no track filter applied at the query layer); rows are visually grouped by track (sorted alphabetically by track name) with ranks restarting per track.
+- [x] When `Group by = Track` is selected, the **Track filter combobox is automatically disabled** (greyed out via `state="disabled"`). When `Group by` switches back to `None`, the Track filter is re-enabled (back to `state="readonly"`). Toggling `Group by` does not lose the Track filter's previously selected value.
+- [x] Changing any filter immediately re-queries and repopulates the Treeview — no explicit Refresh button. Repopulation does not flicker visibly on a typical-size dataset (`delete(*get_children())` then batch `insert`).
+- [x] When the filtered result is empty, an inline label below the filter row reads `No races recorded` and the Treeview is empty. The label is hidden when the result is non-empty.
+- [x] **Reset Session** uses `tkinter.messagebox.askyesno("Reset Session", "Clear current session stats?")` with default focus on No. On Yes: calls `leaderboard.reset_session()`, refreshes the Track combobox values (in case session-only tracks disappear), and re-queries. Historic data on disk untouched.
+- [x] **Reset All** uses `tkinter.messagebox.askyesno("Reset All", "Delete all race history? This cannot be undone.")` with default focus on No. On Yes: calls `leaderboard.reset_all()`, resets the Track combobox to `["All Tracks"]` only, and re-queries (table becomes empty). The JSON file is overwritten to `{schema_version: 1, races: []}`.
+- [x] **Close** dismisses the window and returns control to the main menu.
+- [x] Window is properly modal over the menu (`grab_set` + `wait_window` + WM_DELETE redirected to the Close handler).
+- [x] Restarting the app preserves historic data; the **Current Session** filter shows only races run since the latest start.
+- [x] All Phase 1–3 success criteria still hold; `pytest` remains green.
 
 **Risk notes:**
 - `ttk.Treeview` column-reshape on Group-by change requires reconfiguring `columns`, `heading()`, and `column()` for the active column set, then repopulating. Encapsulate in a `_rebuild_columns(group_by)` helper.
