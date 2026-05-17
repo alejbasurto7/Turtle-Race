@@ -229,7 +229,7 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 |------:|------|:----:|:-------------:|:------:|
 | 1 | Persistence + scoring core (Tk-free) | HIGH | 3 plans / 7+1 commits | **COMPLETE** (2026-05-16) |
 | 2 | Wire `record_race` into round loop + paths basename guard | LOW | 1 plan / 3+1 commits | **COMPLETE** (2026-05-16) |
-| 3 | Main menu + post-race restructure | MED | 3 | pending |
+| 3 | Main menu + post-race restructure | MED | 2 plans / 5+1 commits | **COMPLETE** (2026-05-17) |
 | 4 | Leaderboard view (Notebook: Overall + Per Track tabs, filters, resets) | MED | 4 | pending |
 | 5 | Polish, docs, packaged-exe smoke test | LOW | 2 | pending |
 
