@@ -44,22 +44,24 @@ def main():
         {"track": "spiral",     "species": "snakes",  "bet": 2},
         {"track": "rectangular","species": "turtles", "bet": 3},
     ]
-    round_idx = [0]
-    play_again_count = [len(rounds) - 1]   # answer True N-1 times, then False
+    # Advance round_idx at the start of each round (in get_user_track, the first
+    # dialog called) so the index is decoupled from where ask_play_again sits in
+    # the round body. Survives a Phase 3+ reorder of main()'s round-loop calls.
+    round_idx = 0
 
     def fake_get_user_track():
-        return rounds[round_idx[0]]["track"]
+        nonlocal round_idx
+        round_idx += 1
+        return rounds[round_idx - 1]["track"]
 
     def fake_get_user_species():
-        return rounds[round_idx[0]]["species"]
+        return rounds[round_idx - 1]["species"]
 
     def fake_get_user_bet(species):
-        return rounds[round_idx[0]]["bet"]
+        return rounds[round_idx - 1]["bet"]
 
     def fake_ask_play_again():
-        round_idx[0] += 1
-        play_again_count[0] -= 1
-        return play_again_count[0] >= 0
+        return round_idx < len(rounds)
 
     dialogs.get_user_track = fake_get_user_track
     dialogs.get_user_species = fake_get_user_species
@@ -94,6 +96,11 @@ def main():
     if len(data.get("races", [])) != len(rounds):
         errors.append(f"expected {len(rounds)} race records, got {len(data.get('races', []))}")
 
+    # Timestamps should be non-decreasing across the recorded races.
+    timestamps = [r["ts"] for r in data.get("races", [])]
+    if timestamps != sorted(timestamps):
+        errors.append(f"ts values not in chronological order: {timestamps}")
+
     # Check each race matches the planned round.
     for i, (planned, recorded) in enumerate(zip(rounds, data.get("races", []))):
         if recorded["species"] != planned["species"]:
@@ -113,7 +120,7 @@ def main():
             print(f"  - {e}")
         sys.exit(1)
 
-    print("\n[smoke] PASS — all 3 races recorded with expected schema, species, track, and finish_order length")
+    print(f"\n[smoke] PASS — all {len(rounds)} races recorded with expected schema, species, track, and finish_order length")
     print(f"[smoke] (tmpdir was {tmpdir}; leaderboard.json remains there for inspection)")
 
 

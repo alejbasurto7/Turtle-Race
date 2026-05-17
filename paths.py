@@ -8,6 +8,12 @@ def resource_path(rel_path):
 
 
 def user_data_path(filename: str) -> str:
+    """Return the per-user app-data path for `filename` (created if needed).
+
+    `filename` must be a bare basename (e.g. `"leaderboard.json"`). Raises
+    `ValueError` if it contains a path separator or parent-traversal token.
+    Never returns a path under `sys._MEIPASS`.
+    """
     # Reject any filename containing a path separator or parent-traversal token.
     # Callers must pass a bare basename (e.g. "leaderboard.json"); sanitization is
     # harder to reason about than rejection, so we reject and let the caller fix
