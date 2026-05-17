@@ -28,6 +28,42 @@ _SNAKE_ROW_LAYOUT = [
 ]
 
 
+def get_main_menu_choice() -> str:
+    """Return "race", "leaderboard", or "quit" — the user's main-menu choice.
+
+    Toplevel modal over the lawn background. X-button (WM_DELETE_WINDOW) returns "quit"
+    per CONTEXT-3 Decision 3. Three vertically stacked buttons in order Race / View
+    Leaderboard / Quit. The Race button receives initial keyboard focus.
+    """
+    dialog = tkinter.Toplevel()
+    dialog.title("Turtle Race")
+    dialog.resizable(False, False)
+
+    selected = [None]
+
+    def make_cb(value):
+        def cb():
+            selected[0] = value
+            dialog.destroy()
+        return cb
+
+    race_btn = tkinter.Button(dialog, text="Race", width=24, command=make_cb("race"))
+    leaderboard_btn = tkinter.Button(dialog, text="View Leaderboard", width=24, command=make_cb("leaderboard"))
+    quit_btn = tkinter.Button(dialog, text="Quit", width=24, command=make_cb("quit"))
+    race_btn.pack(padx=20, pady=(20, 6))
+    leaderboard_btn.pack(padx=20, pady=6)
+    quit_btn.pack(padx=20, pady=(6, 20))
+    race_btn.focus_set()  # Race is the primary action.
+
+    dialog.protocol("WM_DELETE_WINDOW", make_cb("quit"))  # X → "quit", per CONTEXT-3 Decision 3.
+
+    dialog.transient()
+    dialog.grab_set()
+    dialog.wait_window()
+
+    return selected[0]
+
+
 def get_user_bet(species):
     """Show the species-appropriate bet dialog and return a 1-based racer index.
 
