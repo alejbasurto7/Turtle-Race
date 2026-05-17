@@ -1,3 +1,6 @@
+# Note: %APPDATA%/TurtleRace/leaderboard.json is generated at runtime by
+# leaderboard.py — it is NOT a bundled resource and does NOT belong in datas=.
+
 block_cipher = None
 
 a = Analysis(
