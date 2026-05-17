@@ -1,5 +1,6 @@
 import tkinter
 import tkinter.messagebox
+from tkinter import ttk
 
 from PIL import Image, ImageTk
 
@@ -367,33 +368,136 @@ def ask_play_again_choice() -> str:
 
 
 def show_leaderboard_placeholder() -> None:
-    """Show a placeholder Toplevel modal informing the user that the leaderboard view
-    is coming in Phase 4. Single Close button; X-button is equivalent to Close.
+    """Show the leaderboard window with four filters, a Treeview, and three buttons.
 
-    Phase 4 will replace this function's body in-place with the real Treeview-based
-    leaderboard view. The name and signature MUST stay stable so Plan 2.1 can wire
-    main.py against it now.
+    Layout (single Toplevel, no Notebook):
+    - Row 0: filter row — Time / Species / Track / Group by ttk.Combobox widgets.
+    - Row 1: empty-state label ("No races recorded"), hidden when rows are present.
+    - Row 2: ttk.Treeview with vertical scrollbar; columns reshape on Group by change.
+    - Row 3: button row — Reset Session / Reset All / Close.
+
+    Filter changes immediately re-query and repopulate. Track combobox is disabled
+    when Group by = Track. Reset buttons gate behind messagebox.askyesno confirmations.
     """
     dialog = tkinter.Toplevel()
     dialog.title("Leaderboard")
-    dialog.resizable(False, False)
+    dialog.resizable(True, True)
+    dialog.geometry("520x420")
 
-    label = tkinter.Label(
-        dialog,
-        text="Leaderboard view coming in Phase 4",
-        padx=30, pady=20,
+    # --- Row 0: filter frame ---
+    filter_frame = tkinter.Frame(dialog)
+    filter_frame.grid(row=0, column=0, sticky="ew", padx=8, pady=(8, 4))
+
+    tkinter.Label(filter_frame, text="Time:").grid(row=0, column=0, padx=(0, 2))
+    dialog._time_combo = ttk.Combobox(
+        filter_frame,
+        values=["All Time", "Current Session", "Today", "This Week", "This Month", "This Year"],
+        state="readonly",
+        width=14,
     )
-    label.pack()
+    dialog._time_combo.set("All Time")
+    dialog._time_combo.grid(row=0, column=1, padx=(0, 8))
 
-    def close():
-        dialog.destroy()
+    tkinter.Label(filter_frame, text="Species:").grid(row=0, column=2, padx=(0, 2))
+    dialog._species_combo = ttk.Combobox(
+        filter_frame,
+        values=["All", "Turtles", "Snakes"],
+        state="readonly",
+        width=8,
+    )
+    dialog._species_combo.set("All")
+    dialog._species_combo.grid(row=0, column=3, padx=(0, 8))
 
-    close_btn = tkinter.Button(dialog, text="Close", width=12, command=close)
-    close_btn.pack(padx=20, pady=(0, 20))
-    close_btn.focus_set()
+    tkinter.Label(filter_frame, text="Track:").grid(row=0, column=4, padx=(0, 2))
+    dialog._track_combo = ttk.Combobox(
+        filter_frame,
+        values=["All Tracks"],
+        state="readonly",
+        width=12,
+    )
+    dialog._track_combo.set("All Tracks")
+    dialog._track_combo.grid(row=0, column=5, padx=(0, 8))
 
-    dialog.protocol("WM_DELETE_WINDOW", close)  # X is equivalent to Close (CONTEXT-3 Decision 2).
+    tkinter.Label(filter_frame, text="Group by:").grid(row=0, column=6, padx=(0, 2))
+    dialog._group_combo = ttk.Combobox(
+        filter_frame,
+        values=["None", "Track"],
+        state="readonly",
+        width=7,
+    )
+    dialog._group_combo.set("None")
+    dialog._group_combo.grid(row=0, column=7)
 
+    # --- Row 1: empty-state label (created up front, hidden immediately) ---
+    dialog._empty_label = tkinter.Label(dialog, text="No races recorded")
+    dialog._empty_label.grid(row=1, column=0, pady=4)
+    dialog._empty_label.grid_remove()  # hidden; re-.grid() restores position without re-specifying coords
+
+    # --- Row 2: Treeview + vertical scrollbar ---
+    dialog.rowconfigure(2, weight=1)
+    dialog.columnconfigure(0, weight=1)
+
+    tree_frame = tkinter.Frame(dialog)
+    tree_frame.grid(row=2, column=0, sticky="nsew", padx=8, pady=4)
+    tree_frame.rowconfigure(0, weight=1)
+    tree_frame.columnconfigure(0, weight=1)
+
+    dialog._tree = ttk.Treeview(
+        tree_frame,
+        columns=("rank", "racer", "points", "races", "wins", "podiums"),
+        show="headings",
+        height=12,
+    )
+
+    # Default column setup for Group by = None
+    dialog._tree.heading("rank",    text="Rank")
+    dialog._tree.heading("racer",   text="Racer")
+    dialog._tree.heading("points",  text="Points")
+    dialog._tree.heading("races",   text="Races")
+    dialog._tree.heading("wins",    text="Wins")
+    dialog._tree.heading("podiums", text="Podiums")
+
+    dialog._tree.column("rank",    width=50,  anchor="center")
+    dialog._tree.column("racer",   width=120, anchor="w")
+    dialog._tree.column("points",  width=70,  anchor="center")
+    dialog._tree.column("races",   width=70,  anchor="center")
+    dialog._tree.column("wins",    width=70,  anchor="center")
+    dialog._tree.column("podiums", width=70,  anchor="center")
+
+    scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=dialog._tree.yview)
+    dialog._tree.configure(yscrollcommand=scrollbar.set)
+
+    dialog._tree.grid(row=0, column=0, sticky="nsew")
+    scrollbar.grid(row=0, column=1, sticky="ns")
+
+    # --- Row 3: button row ---
+    def _on_reset_session():
+        pass
+
+    def _on_reset_all():
+        pass
+
+    btn_frame = tkinter.Frame(dialog)
+    btn_frame.grid(row=3, column=0, pady=(4, 8))
+
+    tkinter.Button(btn_frame, text="Reset Session", width=14, command=_on_reset_session).pack(side="left", padx=6)
+    tkinter.Button(btn_frame, text="Reset All",     width=14, command=_on_reset_all).pack(side="left", padx=6)
+    tkinter.Button(btn_frame, text="Close",         width=10, command=dialog.destroy).pack(side="left", padx=6)
+
+    # --- Temporary no-op filter callbacks (replaced in Task 2) ---
+    def _on_filter_change(event=None):
+        pass
+
+    def _on_group_by_change(event=None):
+        _on_filter_change()
+
+    dialog._time_combo.bind("<<ComboboxSelected>>",    _on_filter_change)
+    dialog._species_combo.bind("<<ComboboxSelected>>", _on_filter_change)
+    dialog._track_combo.bind("<<ComboboxSelected>>",   _on_filter_change)
+    dialog._group_combo.bind("<<ComboboxSelected>>",   _on_group_by_change)
+
+    # --- Modal lifecycle ---
+    dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
     dialog.transient()
     dialog.grab_set()
     dialog.wait_window()
