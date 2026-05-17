@@ -50,8 +50,14 @@ def main():
     import audio
 
     # ---- canned plans ----
-    # Outer menu choices, in order: 2x race, then leaderboard, then race, then quit.
-    menu_choices = iter(["race", "race", "leaderboard", "race", "quit"])
+    # Outer menu choices, in execution order. The flow is:
+    #   menu → race  (enters inner loop)
+    #     round 1 → "again"  (stays in inner loop)
+    #     round 2 → "menu"   (exits inner loop)
+    #   menu → leaderboard   (placeholder no-op; returns to menu)
+    #   menu → race  (enters inner loop)
+    #     round 3 → "quit"   (exits both loops)
+    menu_choices = iter(["race", "leaderboard", "race", "quit"])
 
     # Inner race-rounds: 3 rounds total. Each round needs (track, species, bet).
     rounds = [
@@ -66,12 +72,17 @@ def main():
     # Per-round index, advanced at the start of each race body (first dialog called).
     round_idx = 0
 
+    # Verification counters for branches the smoke claims to exercise.
+    leaderboard_placeholder_calls = 0
+
     def fake_get_main_menu_choice():
         return next(menu_choices)
 
     def fake_show_leaderboard_placeholder():
         # No-op stub for the smoke; the real placeholder just opens a Toplevel
         # the user dismisses. We just return control to the menu loop.
+        nonlocal leaderboard_placeholder_calls
+        leaderboard_placeholder_calls += 1
         return None
 
     def fake_get_user_track():
@@ -141,6 +152,13 @@ def main():
                 f"expected {expected_len} for {planned['species']}"
             )
 
+    # Leaderboard placeholder must have been invoked exactly once during the flow.
+    if leaderboard_placeholder_calls != 1:
+        errors.append(
+            f"expected show_leaderboard_placeholder to be called exactly 1 time, "
+            f"got {leaderboard_placeholder_calls} — the menu→leaderboard branch was not exercised"
+        )
+
     if errors:
         print("\n[smoke] FAIL — verification errors:")
         for e in errors:
@@ -148,7 +166,7 @@ def main():
         sys.exit(1)
 
     print(f"\n[smoke] PASS — {len(rounds)} races recorded with expected schema, species, track, and finish_order length")
-    print(f"[smoke] menu→leaderboard→menu transition executed cleanly (no extra races recorded)")
+    print(f"[smoke] menu→leaderboard→menu transition executed cleanly ({leaderboard_placeholder_calls} placeholder call, no extra races recorded)")
     print(f"[smoke] (tmpdir was {tmpdir}; leaderboard.json remains there for inspection)")
 
 
