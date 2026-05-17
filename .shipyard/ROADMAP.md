@@ -225,12 +225,12 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 
 ## Summary
 
-| Phase | Goal | Risk | Approx. Tasks |
-|------:|------|:----:|:-------------:|
-| 1 | Persistence + scoring core (Tk-free) | HIGH | 3 |
-| 2 | Wire `record_race` into round loop | LOW | 1–2 |
-| 3 | Main menu + post-race restructure | MED | 3 |
-| 4 | Leaderboard view (Notebook: Overall + Per Track tabs, filters, resets) | MED | 4 |
-| 5 | Polish, docs, packaged-exe smoke test | LOW | 2 |
+| Phase | Goal | Risk | Approx. Tasks | Status |
+|------:|------|:----:|:-------------:|:------:|
+| 1 | Persistence + scoring core (Tk-free) | HIGH | 3 plans / 7+1 commits | **COMPLETE** (2026-05-16) |
+| 2 | Wire `record_race` into round loop | LOW | 1–2 | pending |
+| 3 | Main menu + post-race restructure | MED | 3 | pending |
+| 4 | Leaderboard view (Notebook: Overall + Per Track tabs, filters, resets) | MED | 4 | pending |
+| 5 | Polish, docs, packaged-exe smoke test | LOW | 2 | pending |
 
 Total: 13–14 atomic commits across 5 sequential phases, each leaving the app in a runnable state.

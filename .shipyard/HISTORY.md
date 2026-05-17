@@ -169,3 +169,6 @@ Quick task 001: Shuffled MIDI playlist soundtrack (complete) — audio.py rewrit
 - [2026-05-16T20:01:35Z] Phase 1: Project definition captured, ready for planning (ready)
 - [2026-05-16T20:31:47Z] Phase 1: Planning phase 1 (planning)
 - [2026-05-16T20:44:55Z] Phase 1: Phase 1 planned, ready for build (planned)
+- [2026-05-16T23:01:33Z] Phase 1: Building phase 1 (building)
+- [2026-05-16T23:35:52Z] Session ended during build (may need /shipyard:resume)
+- [2026-05-17T01:20:36Z] Phase 1: Phase 1 build complete (complete)
