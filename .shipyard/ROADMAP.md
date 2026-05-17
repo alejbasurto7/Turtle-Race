@@ -194,7 +194,7 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 
 ---
 
-## Phase 5 — Polish and Ship
+## Phase 5 — Polish and Ship — ✅ COMPLETE
 
 **Goal:** Documentation, spec sanity check, and a packaged-exe smoke test. The feature is functionally complete after Phase 4; this phase makes it shippable.
 
@@ -203,13 +203,13 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 **Risk: LOW** — mostly documentation. The packaging smoke test could surface a `_MEIPASS` path bug if Phase 1's `user_data_path` was implemented wrong; that's the one place a regression could appear.
 
 **Success criteria:**
-- [ ] [CLAUDE.md](../CLAUDE.md) gains a short addendum (10–20 lines) covering: the new main-menu entry point, the `%APPDATA%\TurtleRace\leaderboard.json` data path, the `leaderboard.py` module's Tk-free invariant, and a pointer to the JSON schema version field.
-- [ ] [turtle_race.spec](../turtle_race.spec) is reviewed — no new `datas=` entries are required (the leaderboard file is generated at runtime, not bundled), but confirm explicitly in the spec comment or commit message.
-- [ ] README (if one exists / once one exists) — describe how to view the leaderboard and where data is stored. (If no README, this bullet is skipped without ceremony.)
-- [ ] Build `dist/TurtleRace.exe` via `pyinstaller turtle_race.spec`; run the exe; race once; quit; confirm `%APPDATA%\TurtleRace\leaderboard.json` now contains that race; re-launch the exe and verify the **All Time** view shows it.
-- [ ] Smoke-test all reset paths from the packaged exe: Reset Session leaves the JSON file present and unchanged; Reset All wipes it to `{schema_version: 1, races: []}`.
-- [ ] All previous-phase success criteria still hold.
-- [ ] `pytest` remains green.
+- [x] [CLAUDE.md](../CLAUDE.md) gains a short addendum (10–20 lines) covering: the new main-menu entry point, the `%APPDATA%\TurtleRace\leaderboard.json` data path, the `leaderboard.py` module's Tk-free invariant, and a pointer to the JSON schema version field.
+- [x] [turtle_race.spec](../turtle_race.spec) is reviewed — no new `datas=` entries are required (the leaderboard file is generated at runtime, not bundled), but confirm explicitly in the spec comment or commit message.
+- [x] README (if one exists / once one exists) — describe how to view the leaderboard and where data is stored. (If no README, this bullet is skipped without ceremony.)
+- [x] Build `dist/TurtleRace.exe` via `pyinstaller turtle_race.spec`; run the exe; race once; quit; confirm `%APPDATA%\TurtleRace\leaderboard.json` now contains that race; re-launch the exe and verify the **All Time** view shows it.
+- [x] Smoke-test all reset paths from the packaged exe: Reset Session leaves the JSON file present and unchanged; Reset All wipes it to `{schema_version: 1, races: []}`.
+- [x] All previous-phase success criteria still hold.
+- [x] `pytest` remains green.
 
 **Risk notes:**
 - If `user_data_path()` accidentally falls back to a path inside `_MEIPASS` in the frozen build, the exe will appear to work for one run and then "lose" data on every relaunch (because `_MEIPASS` is recreated per launch). The smoke test of relaunching and seeing the prior race is what catches this.
@@ -231,7 +231,7 @@ Phases are strictly sequential. There is no opportunity for parallel phases here
 | 1 | Persistence + scoring core (Tk-free) | HIGH | 3 plans / 7+1 commits | **COMPLETE** (2026-05-16) |
 | 2 | Wire `record_race` into round loop + paths basename guard | LOW | 1 plan / 3+1 commits | **COMPLETE** (2026-05-16) |
 | 3 | Main menu + post-race restructure | MED | 2 plans / 5+1 commits | **COMPLETE** (2026-05-17) |
-| 4 | Leaderboard view (Notebook: Overall + Per Track tabs, filters, resets) | MED | 4 | pending |
-| 5 | Polish, docs, packaged-exe smoke test | LOW | 2 | pending |
+| 4 | Leaderboard view (single Toplevel + Group-by filter, filters, resets) | MED | 2 plans / 4+1 commits | **COMPLETE** (2026-05-17) |
+| 5 | Polish, docs, packaged-exe smoke test | LOW | 2 plans / 3+1 commits | **COMPLETE** (2026-05-17) |
 
 Total: 13–14 atomic commits across 5 sequential phases, each leaving the app in a runnable state.
