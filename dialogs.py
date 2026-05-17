@@ -397,7 +397,3 @@ def show_leaderboard_placeholder() -> None:
     dialog.transient()
     dialog.grab_set()
     dialog.wait_window()
-
-
-def ask_play_again():
-    return tkinter.messagebox.askyesno("Turtle Race", "Do you want to play again?")
