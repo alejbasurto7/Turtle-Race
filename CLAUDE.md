@@ -37,7 +37,7 @@ Output lands in `dist/TurtleRace.exe`. Build intermediates in `build/` and `dist
 Single-process Tk app. Three runtimes share the same Tk root and must coexist:
 
 - **`turtle` module** drives the race animation. `Screen()` is created once via `race.make_screen()` and reused across rounds via `screen.clear()` + re-`set_background()` rather than recreated.
-- **`tkinter`** owns the three modal dialogs in [dialogs.py](dialogs.py) — track selection, species selection, bet — and the "play again?" `messagebox`. Each dialog uses `Toplevel` + `grab_set()` + `wait_window()` to block until the user chooses, with `WM_DELETE_WINDOW` no-op to force a choice.
+- **`tkinter`** owns the six modal dialogs in [dialogs.py](dialogs.py) — `get_user_track`, `get_user_species`, `get_user_bet`, `ask_play_again_choice`, `get_main_menu_choice`, and `show_leaderboard`. Each dialog uses `Toplevel` + `grab_set()` + `wait_window()` to block until the user chooses, with `WM_DELETE_WINDOW` redirected (no-op or routed to a Close handler) so the user must pick a button.
 - **`pygame.mixer`** plays the looped MIDI soundtrack as background music (initialized and stopped via [audio.py](audio.py)). It is started once at the top of `main()` and stopped on exit.
 
 ### Resource loading (PyInstaller-aware)
@@ -86,3 +86,13 @@ The background image is stashed on `canvas._bg_photo`. Preserve this pattern whe
 Each race round flows: `screen.clear()` → `set_background()` → `get_user_track()` → `get_user_species()` → `create_racers(species)` → place/draw → `get_user_bet(species)` → `run_race(racers, ...)` → `leaderboard.record_race(species, track_name, finish_order_names)` → `show_podium` → `celebrate` → `announce_result` → `ask_play_again_choice()`.
 
 The race loop itself lives in `race.run_race(...)`. It advances every racer along its lane path by a fraction of `shared_distance` per tick (so longer lanes like the spiral don't auto-lose), detects finishers, and runs a fixed `COAST_TICKS` post-finish coast for visual polish. No `is_race_on` boolean, no `cheat_mode` branch — those were removed during the Phase 2 generalization.
+
+### Leaderboard (Phase 1 module, Phase 4 view)
+
+[leaderboard.py](leaderboard.py) is the persistence and scoring core. It is **Tk-free** — `import leaderboard` succeeds in a headless Python with no `DISPLAY` and no Tk root. The three no-GUI smoke scripts (`tools/smoke_phase_3.py`, `tools/smoke_phase_4.py`, `tools/smoke_phase_5.py`) depend on this invariant: they import `leaderboard` directly and never instantiate a `Tk()` root. Do not add `import tkinter` (or any Tk-touching helper) to `leaderboard.py`.
+
+The on-disk store lives at `%APPDATA%\TurtleRace\leaderboard.json` on Windows (`~/.local/share/TurtleRace/leaderboard.json` on Linux, `~/Library/Application Support/TurtleRace/leaderboard.json` on macOS), resolved via `paths.user_data_path("leaderboard.json")`. `user_data_path()` is the writable-per-user-data sibling of `resource_path()` — it **never** returns a path inside `sys._MEIPASS`. The JSON file is **generated at runtime** by `leaderboard._save()`; it is NOT a [turtle_race.spec](turtle_race.spec) `datas=` entry.
+
+The schema is `{"schema_version": 1, "races": [...]}` (constant `leaderboard.SCHEMA_VERSION`). Future migrations dispatch on `schema_version`; only v1 ships today. Writes are atomic (tempfile + `os.replace`) and unparseable input is quarantined to `<path>.corrupt-<ts>` and replaced with a fresh empty store.
+
+[dialogs.py](dialogs.py)'s `show_leaderboard()` reads data **only** through the public `leaderboard` API — `query`, `query_per_track`, `known_tracks`, `reset_session`, `reset_all` — never via direct file I/O. This direction (`dialogs` imports `leaderboard`, never the reverse) keeps the Tk-free invariant intact.
