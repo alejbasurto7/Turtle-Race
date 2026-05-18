@@ -17,8 +17,8 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from constants import TRACK_PREVIEW_H, TRACK_PREVIEW_W  # noqa: E402
 
-ASSETS_DIR = os.path.join(PROJECT_ROOT, "assets")
-LAWN_PATH = os.path.join(PROJECT_ROOT, "lawn.jpg")
+ASSETS_DIR = os.path.join(PROJECT_ROOT, "assets", "tracks")
+LAWN_PATH = os.path.join(PROJECT_ROOT, "assets", "lawn.jpg")
 
 STROKE = (255, 255, 255)              # bold white reads cleanly over grass
 STROKE_SHADOW = (20, 50, 20)          # very dark green, drawn 1 px offset for legibility

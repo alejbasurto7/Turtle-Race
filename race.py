@@ -49,7 +49,7 @@ def set_background():
     width = _screen.window_width()
     height = _screen.window_height()
     canvas = _screen.getcanvas()
-    img = Image.open(resource_path("lawn.jpg"))
+    img = Image.open(resource_path("assets/lawn.jpg"))
     scale = max(width / img.width, height / img.height)
     new_w, new_h = int(img.width * scale), int(img.height * scale)
     img = img.resize((new_w, new_h), Image.LANCZOS)

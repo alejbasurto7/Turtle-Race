@@ -17,10 +17,10 @@ MAX_PACE = 10
 TICK_DELAY = 0.01   # seconds between race ticks; tweak for race duration
 STARTING_Y = 100
 TURTLE_IMAGES = {
-    "Raphael":      "assets/turtle_3_raphael_bottom_left.jpg",
-    "Michaelangelo": "assets/turtle_4_michelangelo_bottom_right.jpg",
-    "Leonardo":     "assets/turtle_1_leonardo_top_left.jpg",
-    "Donatello":    "assets/turtle_2_donatello_top_right.jpg",
+    "Raphael":      "assets/turtles/turtle_3_raphael_bottom_left.jpg",
+    "Michaelangelo": "assets/turtles/turtle_4_michelangelo_bottom_right.jpg",
+    "Leonardo":     "assets/turtles/turtle_1_leonardo_top_left.jpg",
+    "Donatello":    "assets/turtles/turtle_2_donatello_top_right.jpg",
 }
 BET_IMAGE_SIZE = 140             # px, square — used by the bet dialog
 SPECIES_DIALOG_IMAGE_SIZE = 200  # px, square — used by the species-selection dialog (composite images)

@@ -210,9 +210,9 @@ def get_user_track():
     dialog._track_images = []
 
     layout = [
-        (tracks.STRAIGHT,    "Straight",    "assets/track_straight.png",    0),
-        (tracks.RECTANGULAR, "Rectangular", "assets/track_rectangular.png", 1),
-        (tracks.SPIRAL,      "Spiral",      "assets/track_spiral.png",      2),
+        (tracks.STRAIGHT,    "Straight",    "assets/tracks/track_straight.png",    0),
+        (tracks.RECTANGULAR, "Rectangular", "assets/tracks/track_rectangular.png", 1),
+        (tracks.SPIRAL,      "Spiral",      "assets/tracks/track_spiral.png",      2),
     ]
 
     for track_name, label, image_path, col in layout:

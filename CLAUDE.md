@@ -42,7 +42,7 @@ Single-process Tk app. Three runtimes share the same Tk root and must coexist:
 
 ### Resource loading (PyInstaller-aware)
 
-All asset paths must be resolved through `resource_path()` (defined in [paths.py](paths.py)), which honors `sys._MEIPASS` so the frozen build can find bundled files. When you add a new asset, also add it to the `datas=` list in [turtle_race.spec](turtle_race.spec) — otherwise it works from source but breaks in the packaged exe. Note: glob patterns in `datas=` do **not** recurse, so subdirectories like `assets/snakes/*.png` need their own entries.
+All asset paths must be resolved through `resource_path()` (defined in [paths.py](paths.py)), which honors `sys._MEIPASS` so the frozen build can find bundled files. When you add a new asset, also add it to the `datas=` list in [turtle_race.spec](turtle_race.spec) — otherwise it works from source but breaks in the packaged exe. Note: glob patterns in `datas=` do **not** recurse, so subdirectories like `assets/snakes/*.png`, `assets/tracks/*.png`, and `assets/turtles/*.jpg` each need their own entries.
 
 ### Racer identity is positional, and species-dispatched
 
