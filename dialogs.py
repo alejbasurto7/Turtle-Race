@@ -29,6 +29,24 @@ _SNAKE_ROW_LAYOUT = [
     ("Anaconda", 1, 2),
 ]
 
+def _center_dialog(dialog):
+    """Center ``dialog`` on the user's screen. Call after widgets are added and
+    any explicit ``geometry("WxH")`` size has been set, but before
+    ``grab_set()`` / ``wait_window()``. Falls back to the requested size when
+    the window has not yet been mapped (so it works with both pack/grid layouts
+    and dialogs that set their geometry explicitly)."""
+    dialog.update_idletasks()
+    w = dialog.winfo_width()
+    h = dialog.winfo_height()
+    if w <= 1:
+        w = dialog.winfo_reqwidth()
+    if h <= 1:
+        h = dialog.winfo_reqheight()
+    x = (dialog.winfo_screenwidth() - w) // 2
+    y = (dialog.winfo_screenheight() - h) // 2
+    dialog.geometry(f"+{x}+{y}")
+
+
 # Maps user-facing combobox strings to leaderboard API enum values.
 # Track names are leaderboard track strings already (no entry needed here);
 # the "All Tracks" sentinel maps to "all" via explicit handling in _repopulate.
@@ -80,6 +98,7 @@ def get_main_menu_choice() -> str:
     dialog.protocol("WM_DELETE_WINDOW", make_cb("quit"))  # X → "quit", per CONTEXT-3 Decision 3.
 
     dialog.transient()
+    _center_dialog(dialog)
     dialog.grab_set()
     dialog.wait_window()
 
@@ -179,13 +198,7 @@ def get_user_bet(species):
     else:
         raise ValueError(f"Unknown bet_layout: {bet_layout!r}")
 
-    # Center on screen
-    dialog.update_idletasks()
-    w, h = dialog.winfo_width(), dialog.winfo_height()
-    x = (dialog.winfo_screenwidth() - w) // 2
-    y = (dialog.winfo_screenheight() - h) // 2
-    dialog.geometry(f"+{x}+{y}")
-
+    _center_dialog(dialog)
     dialog.grab_set()
     dialog.wait_window()
 
@@ -237,12 +250,7 @@ def get_user_track():
             command=make_cb(track_name),
         ).grid(row=1, column=col, padx=12, pady=8)
 
-    dialog.update_idletasks()
-    w, h = dialog.winfo_width(), dialog.winfo_height()
-    x = (dialog.winfo_screenwidth() - w) // 2
-    y = (dialog.winfo_screenheight() - h) // 2
-    dialog.geometry(f"+{x}+{y}")
-
+    _center_dialog(dialog)
     dialog.grab_set()
     dialog.wait_window()
 
@@ -333,13 +341,7 @@ def get_user_species():
         command=make_cb("snakes"),
     ).grid(row=1, column=1, padx=12, pady=8)
 
-    # Center on screen
-    dialog.update_idletasks()
-    w, h = dialog.winfo_width(), dialog.winfo_height()
-    x = (dialog.winfo_screenwidth() - w) // 2
-    y = (dialog.winfo_screenheight() - h) // 2
-    dialog.geometry(f"+{x}+{y}")
-
+    _center_dialog(dialog)
     dialog.grab_set()
     dialog.wait_window()
 
@@ -382,6 +384,7 @@ def ask_play_again_choice() -> str:
     dialog.protocol("WM_DELETE_WINDOW", make_cb("menu"))  # X → "menu", per CONTEXT-3 Decision 4.
 
     dialog.transient()
+    _center_dialog(dialog)
     dialog.grab_set()
     dialog.wait_window()
 
@@ -620,5 +623,6 @@ def show_leaderboard() -> None:
     # --- Modal lifecycle ---
     dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
     dialog.transient()
+    _center_dialog(dialog)
     dialog.grab_set()
     dialog.wait_window()

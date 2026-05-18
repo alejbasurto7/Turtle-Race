@@ -203,3 +203,7 @@ Quick task 001: Shuffled MIDI playlist soundtrack (complete) — audio.py rewrit
 - [2026-05-17T23:33:46Z] Phase 5: Plan 2.1 complete [builder:sonnet, verdict:PASS, retries:0, domain:test]
 - [2026-05-17T23:36:47Z] Phase 5: Phase 5 build complete (complete)
 - [2026-05-18T00:36:30Z] Milestone shipped via merge_locally (Turtle Race Leaderboard) (shipped)
+
+## 2026-05-18 — Quick task 001
+
+- Quick task 001: Center every window on screen (complete)
