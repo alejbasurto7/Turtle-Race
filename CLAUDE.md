@@ -27,10 +27,10 @@ pytest tests/test_constants.py::test_image_files_exist_on_disk   # single test
 Build the standalone Windows executable with PyInstaller (uses the spec, which is the source of truth for bundled data files):
 
 ```powershell
-pyinstaller turtle_race.spec
+pyinstaller reptile_race.spec
 ```
 
-Output lands in `dist/TurtleRace.exe`. Build intermediates in `build/` and `dist/` are disposable.
+Output lands in `dist/ReptileRace.exe`. Build intermediates in `build/` and `dist/` are disposable.
 
 ## Architecture
 
@@ -42,7 +42,7 @@ Single-process Tk app. Three runtimes share the same Tk root and must coexist:
 
 ### Resource loading (PyInstaller-aware)
 
-All asset paths must be resolved through `resource_path()` (defined in [paths.py](paths.py)), which honors `sys._MEIPASS` so the frozen build can find bundled files. When you add a new asset, also add it to the `datas=` list in [turtle_race.spec](turtle_race.spec) — otherwise it works from source but breaks in the packaged exe. Note: glob patterns in `datas=` do **not** recurse, so subdirectories like `assets/snakes/*.png`, `assets/tracks/*.png`, and `assets/turtles/*.jpg` each need their own entries.
+All asset paths must be resolved through `resource_path()` (defined in [paths.py](paths.py)), which honors `sys._MEIPASS` so the frozen build can find bundled files. When you add a new asset, also add it to the `datas=` list in [reptile_race.spec](reptile_race.spec) — otherwise it works from source but breaks in the packaged exe. Note: glob patterns in `datas=` do **not** recurse, so subdirectories like `assets/snakes/*.png`, `assets/tracks/*.png`, and `assets/turtles/*.jpg` each need their own entries.
 
 ### Racer identity is positional, and species-dispatched
 
@@ -91,7 +91,7 @@ The race loop itself lives in `race.run_race(...)`. It advances every racer alon
 
 [leaderboard.py](leaderboard.py) is the persistence and scoring core. It is **Tk-free** — `import leaderboard` succeeds in a headless Python with no `DISPLAY` and no Tk root. The three no-GUI smoke scripts (`tools/smoke_phase_3.py`, `tools/smoke_phase_4.py`, `tools/smoke_phase_5.py`) depend on this invariant: they import `leaderboard` directly and never instantiate a `Tk()` root. Do not add `import tkinter` (or any Tk-touching helper) to `leaderboard.py`.
 
-The on-disk store lives at `%APPDATA%\TurtleRace\leaderboard.json` on Windows (`~/.local/share/TurtleRace/leaderboard.json` on Linux, `~/Library/Application Support/TurtleRace/leaderboard.json` on macOS), resolved via `paths.user_data_path("leaderboard.json")`. `user_data_path()` is the writable-per-user-data sibling of `resource_path()` — it **never** returns a path inside `sys._MEIPASS`. The JSON file is **generated at runtime** by `leaderboard._save()`; it is NOT a [turtle_race.spec](turtle_race.spec) `datas=` entry.
+The on-disk store lives at `%APPDATA%\ReptileRace\leaderboard.json` on Windows (`~/.local/share/ReptileRace/leaderboard.json` on Linux, `~/Library/Application Support/ReptileRace/leaderboard.json` on macOS), resolved via `paths.user_data_path("leaderboard.json")`. `user_data_path()` is the writable-per-user-data sibling of `resource_path()` — it **never** returns a path inside `sys._MEIPASS`. The JSON file is **generated at runtime** by `leaderboard._save()`; it is NOT a [reptile_race.spec](reptile_race.spec) `datas=` entry.
 
 The schema is `{"schema_version": 1, "races": [...]}` (constant `leaderboard.SCHEMA_VERSION`). Future migrations dispatch on `schema_version`; only v1 ships today. Writes are atomic (tempfile + `os.replace`) and unparseable input is quarantined to `<path>.corrupt-<ts>` and replaced with a fresh empty store.
 

@@ -33,7 +33,7 @@ def make_screen():
     if _screen is not None:
         return _screen
     _screen = Screen()
-    _screen.title("Turtle Race")
+    _screen.title("Reptile Race")
     _screen.setup(width=1.0, height=1.0)
     tracks.set_window_size(_screen.window_width(), _screen.window_height())
     return _screen

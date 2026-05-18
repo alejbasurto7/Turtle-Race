@@ -76,7 +76,7 @@ def get_main_menu_choice() -> str:
     Leaderboard / Quit. The Race button receives initial keyboard focus.
     """
     dialog = tkinter.Toplevel()
-    dialog.title("Turtle Race")
+    dialog.title("Reptile Race")
     dialog.resizable(False, False)
 
     selected = [None]
@@ -356,7 +356,7 @@ def ask_play_again_choice() -> str:
     buttons in order Play Again / Main Menu / Quit. Play Again receives initial keyboard focus.
     """
     dialog = tkinter.Toplevel()
-    dialog.title("Turtle Race")
+    dialog.title("Reptile Race")
     dialog.resizable(False, False)
 
     selected = [None]

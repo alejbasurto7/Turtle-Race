@@ -37,7 +37,7 @@ import tempfile
 
 def main():
     # Redirect %APPDATA% BEFORE any import that resolves paths.user_data_path.
-    tmpdir = tempfile.mkdtemp(prefix="turtlerace_phase3_smoke_")
+    tmpdir = tempfile.mkdtemp(prefix="reptilerace_phase3_smoke_")
     os.environ["APPDATA"] = tmpdir
     print(f"[smoke] redirected %APPDATA% to {tmpdir}")
 

@@ -1,4 +1,4 @@
-"""Audio diagnostic for the turtle-race music issue.
+"""Audio diagnostic for the reptile-race music issue.
 
 Runs three independent sound tests, asking Yes/No via a tkinter dialog
 after each. Run from the project root with normal Python (NOT pytest):

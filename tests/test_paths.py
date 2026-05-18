@@ -13,7 +13,7 @@ def test_user_data_path_windows_uses_appdata(monkeypatch, tmp_path):
     monkeypatch.setenv("APPDATA", str(tmp_path))
     result = user_data_path("leaderboard.json")
     assert result.startswith(str(tmp_path))
-    expected_suffix = os.path.join("TurtleRace", "leaderboard.json")
+    expected_suffix = os.path.join("ReptileRace", "leaderboard.json")
     assert result.endswith(expected_suffix)
 
 
@@ -31,7 +31,7 @@ def test_user_data_path_windows_falls_back_when_appdata_unset(monkeypatch, tmp_p
     monkeypatch.delenv("APPDATA", raising=False)
     monkeypatch.setattr(os.path, "expanduser", _fake_expanduser(tmp_path))
     result = user_data_path("leaderboard.json")
-    assert "TurtleRace" in result
+    assert "ReptileRace" in result
     assert result.startswith(str(tmp_path))   # write landed under tmp_path, not real home
 
 
@@ -41,7 +41,7 @@ def test_user_data_path_macos(monkeypatch, tmp_path):
     result = user_data_path("leaderboard.json")
     # Use forward slashes: expanduser produces them on all OSes for the ~ portion.
     normalized = result.replace("\\", "/")
-    assert "Library/Application Support/TurtleRace" in normalized
+    assert "Library/Application Support/ReptileRace" in normalized
     assert result.startswith(str(tmp_path))   # write landed under tmp_path, not real home
 
 
@@ -50,7 +50,7 @@ def test_user_data_path_linux_uses_xdg(monkeypatch, tmp_path):
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
     result = user_data_path("leaderboard.json")
     assert result.startswith(str(tmp_path))
-    expected_suffix = os.path.join("TurtleRace", "leaderboard.json")
+    expected_suffix = os.path.join("ReptileRace", "leaderboard.json")
     assert result.endswith(expected_suffix)
 
 
@@ -61,7 +61,7 @@ def test_user_data_path_linux_falls_back_to_local_share(monkeypatch, tmp_path):
     result = user_data_path("leaderboard.json")
     # Use forward slashes: expanduser produces them on all OSes for the ~ portion.
     normalized = result.replace("\\", "/")
-    assert ".local/share/TurtleRace" in normalized
+    assert ".local/share/ReptileRace" in normalized
     assert result.startswith(str(tmp_path))   # write landed under tmp_path, not real home
 
 
@@ -87,7 +87,7 @@ def test_user_data_path_creates_parent_dir(monkeypatch, tmp_path):
     nested = tmp_path / "nested" / "dir"
     monkeypatch.setenv("XDG_DATA_HOME", str(nested))
     user_data_path("x")
-    assert os.path.isdir(tmp_path / "nested" / "dir" / "TurtleRace")
+    assert os.path.isdir(tmp_path / "nested" / "dir" / "ReptileRace")
 
 
 # --- Filename validation (Phase 2 basename guard) ---

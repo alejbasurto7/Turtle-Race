@@ -3,7 +3,7 @@
 > **This is the manual gate before any actual release.**
 > The automated source-mode equivalents are in `tools/smoke_phase_5.py` — running
 > both is the full Phase 5 smoke. This checklist requires a Windows host with
-> PyInstaller installed and write access to `%APPDATA%\TurtleRace\`.
+> PyInstaller installed and write access to `%APPDATA%\ReptileRace\`.
 > Complete every step in order and record PASS or FAIL for each.
 
 ---
@@ -39,13 +39,13 @@ Remove-Item -Recurse -Force build, dist -ErrorAction SilentlyContinue
 
 ### Step 2 — Build the exe
 
-**Action:** Run `pyinstaller turtle_race.spec` from the project root.
+**Action:** Run `pyinstaller reptile_race.spec` from the project root.
 
 ```powershell
-pyinstaller turtle_race.spec
+pyinstaller reptile_race.spec
 ```
 
-**Verify:** command exits 0; `dist/TurtleRace.exe` exists and is larger than
+**Verify:** command exits 0; `dist/ReptileRace.exe` exists and is larger than
 0 bytes.
 
 - [ ] PASS  - [ ] FAIL
@@ -58,10 +58,10 @@ pyinstaller turtle_race.spec
 deterministic.
 
 ```powershell
-Remove-Item "$env:APPDATA\TurtleRace\leaderboard.json" -ErrorAction SilentlyContinue
+Remove-Item "$env:APPDATA\ReptileRace\leaderboard.json" -ErrorAction SilentlyContinue
 ```
 
-**Verify:** `Test-Path "$env:APPDATA\TurtleRace\leaderboard.json"` returns `False`.
+**Verify:** `Test-Path "$env:APPDATA\ReptileRace\leaderboard.json"` returns `False`.
 
 - [ ] PASS  - [ ] FAIL
 
@@ -72,10 +72,10 @@ Remove-Item "$env:APPDATA\TurtleRace\leaderboard.json" -ErrorAction SilentlyCont
 **Action:** Launch the packaged exe.
 
 ```powershell
-.\dist\TurtleRace.exe
+.\dist\ReptileRace.exe
 ```
 
-Or double-click `dist\TurtleRace.exe` from Explorer.
+Or double-click `dist\ReptileRace.exe` from Explorer.
 
 **Verify:** Main menu opens showing Race / View Leaderboard / Quit options.
 Background music plays.
@@ -106,12 +106,12 @@ Background music plays.
 **Action:** In PowerShell, inspect the leaderboard file.
 
 ```powershell
-Get-Content "$env:APPDATA\TurtleRace\leaderboard.json"
+Get-Content "$env:APPDATA\ReptileRace\leaderboard.json"
 ```
 
 **Verify:**
 
-- File exists at `%APPDATA%\TurtleRace\leaderboard.json`.
+- File exists at `%APPDATA%\ReptileRace\leaderboard.json`.
 - JSON contains `"schema_version": 1`.
 - `"races"` is a list with exactly 1 entry.
 - That entry's `species`, `track`, and `finish_order` match the race you ran
@@ -123,7 +123,7 @@ Get-Content "$env:APPDATA\TurtleRace\leaderboard.json"
 
 ### Step 7 — Re-launch and confirm All-Time view shows the race
 
-**Action:** Run `.\dist\TurtleRace.exe` again. From the main menu choose
+**Action:** Run `.\dist\ReptileRace.exe` again. From the main menu choose
 **View Leaderboard**.
 
 **Verify:**
@@ -154,7 +154,7 @@ confirm **Yes** on the confirmation dialog.
 - Open the JSON file again:
 
   ```powershell
-  Get-Content "$env:APPDATA\TurtleRace\leaderboard.json"
+  Get-Content "$env:APPDATA\ReptileRace\leaderboard.json"
   ```
 
   It is unchanged — still 1 race, same content as after Step 6.
@@ -174,7 +174,7 @@ confirm **Yes** on the confirmation dialog.
 - Open the JSON file:
 
   ```powershell
-  Get-Content "$env:APPDATA\TurtleRace\leaderboard.json"
+  Get-Content "$env:APPDATA\ReptileRace\leaderboard.json"
   ```
 
   It now reads exactly `{"schema_version": 1, "races": []}` (or the
@@ -197,7 +197,7 @@ menu.
 
 ## Sign-off
 
-Tested by: ________   Date: ________   Build: `dist/TurtleRace.exe`  sha256: ________
+Tested by: ________   Date: ________   Build: `dist/ReptileRace.exe`  sha256: ________
 
 > **Note:** The automated source-mode complement to this checklist is
 > `tools/smoke_phase_5.py`. Run it before each build (pre-flight Step 2 above)

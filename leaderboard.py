@@ -1,7 +1,7 @@
-"""Per-user leaderboard persistence for the Turtle Race game.
+"""Per-user leaderboard persistence for the Reptile Race game.
 
 Tk-free, stdlib-only. Race results are appended to a JSON file under the
-user's per-user app-data directory (Windows: %APPDATA%\\TurtleRace\\;
+user's per-user app-data directory (Windows: %APPDATA%\\ReptileRace\\;
 macOS / Linux: see paths.user_data_path) — never under the PyInstaller
 sys._MEIPASS bundle. All file I/O is funneled through paths.user_data_path
 and uses os.replace for atomic writes.

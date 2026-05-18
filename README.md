@@ -1,4 +1,4 @@
-# Turtle Race
+# Reptile Race
 
 A whimsical Python racing game where you bet on Teenage Mutant Ninja Turtles or snakes scrambling across one of three tracks, set to a looping rock/MIDI soundtrack.
 
@@ -11,7 +11,7 @@ Built on the standard-library `turtle` module, `tkinter` dialogs, and `pygame.mi
 - **Place a bet** on a racer before the round starts and find out at the finish line whether you picked the winner.
 - **Snake size variety:** Shadow, Ralph, and Anaconda race at a locked 6 : 2 : 5 length ratio, so the visual reads like real snakes rather than identical sprites.
 - **Podium ceremony** after every race showing the top three in scaled-up form, plus a celebration animation if your bet won.
-- **Persistent leaderboard** stored under `%APPDATA%\TurtleRace\leaderboard.json` (Windows) — tracks wins per racer overall and per-track, survives across sessions, and is viewable from the main menu.
+- **Persistent leaderboard** stored under `%APPDATA%\ReptileRace\leaderboard.json` (Windows) — tracks wins per racer overall and per-track, survives across sessions, and is viewable from the main menu.
 - **Looping rock/MIDI soundtrack** (TMNT theme, Back in Black, Thunderstruck, Highway to Hell, Danger Zone, and more) playing in the background while you race.
 - **Main menu loop:** race round after round, browse the leaderboard, or quit cleanly — no need to restart the app.
 - **PyInstaller-friendly:** all asset paths resolve through a single helper so the frozen exe finds everything bundled inside it.
@@ -34,18 +34,18 @@ pytest
 
 ## Build your own Windows executable
 
-The project ships a PyInstaller spec file ([turtle_race.spec](turtle_race.spec)) that is the source of truth for which assets get bundled into the exe.
+The project ships a PyInstaller spec file ([reptile_race.spec](reptile_race.spec)) that is the source of truth for which assets get bundled into the exe.
 
 ```powershell
 pip install pyinstaller
-pyinstaller turtle_race.spec
+pyinstaller reptile_race.spec
 ```
 
-The build produces `dist/TurtleRace.exe` — a single windowed executable with no console. The `build/` and `dist/` directories are disposable; delete them to do a clean rebuild.
+The build produces `dist/ReptileRace.exe` — a single windowed executable with no console. The `build/` and `dist/` directories are disposable; delete them to do a clean rebuild.
 
 ### Adding new assets
 
-If you add an image or MIDI file, you must also add it to the `datas=` list in [turtle_race.spec](turtle_race.spec) — otherwise the asset works when running from source but is missing in the packaged exe. Note that the glob patterns in `datas=` do **not** recurse, so each asset subdirectory (`assets/turtles/*.jpg`, `assets/snakes/*.png`, `assets/tracks/*.png`, `assets/midi/*.mid`) needs its own entry.
+If you add an image or MIDI file, you must also add it to the `datas=` list in [reptile_race.spec](reptile_race.spec) — otherwise the asset works when running from source but is missing in the packaged exe. Note that the glob patterns in `datas=` do **not** recurse, so each asset subdirectory (`assets/turtles/*.jpg`, `assets/snakes/*.png`, `assets/tracks/*.png`, `assets/midi/*.mid`) needs its own entry.
 
 ## Project layout
 
@@ -59,7 +59,7 @@ If you add an image or MIDI file, you must also add it to the `datas=` list in [
 | [audio.py](audio.py) | `pygame.mixer` MIDI playback wrapper |
 | [constants.py](constants.py) | Per-species identity, `SPECIES` dispatch config, layout sizes |
 | [paths.py](paths.py) | `resource_path()` (PyInstaller-aware) and `user_data_path()` |
-| [turtle_race.spec](turtle_race.spec) | PyInstaller build config — source of truth for bundled assets |
+| [reptile_race.spec](reptile_race.spec) | PyInstaller build config — source of truth for bundled assets |
 | [tests/](tests/) | pytest suite covering constants invariants and asset wiring |
 | [assets/](assets/) | Turtle JPGs, snake PNGs, track previews, lawn background, MIDI tracks |
 

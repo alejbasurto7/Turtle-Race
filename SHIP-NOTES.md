@@ -1,4 +1,4 @@
-# Turtle Race — Snakes Racer Mode: Ship Notes
+# Reptile Race — Snakes Racer Mode: Ship Notes
 
 ## What Shipped
 
@@ -28,7 +28,7 @@ See CLAUDE.md for full command reference. Quick reference:
 
 - Dev run: `python main.py`
 - Tests: `pytest` (expect 85/85)
-- Build: `pyinstaller turtle_race.spec` → `dist/TurtleRace.exe`
+- Build: `pyinstaller reptile_race.spec` → `dist/ReptileRace.exe`
 
 ## Known Deferrals
 

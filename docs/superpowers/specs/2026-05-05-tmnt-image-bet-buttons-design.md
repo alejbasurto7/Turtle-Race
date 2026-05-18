@@ -68,7 +68,7 @@ Bet index returned to the caller is still the 1-based index of the clicked turtl
 
 ### 4. PyInstaller bundling
 
-Update `turtle_race.spec`:
+Update `reptile_race.spec`:
 
 ```python
 datas=[('lawn.jpg', '.'), ('assets/*.jpg', 'assets')],
@@ -86,5 +86,5 @@ This ships the four turtle images alongside `lawn.jpg` inside the frozen executa
 ## Risk and verification
 
 - **Image-to-name mismatch** is the main risk (which image gets which name). Mitigated by using a name-keyed dict in `constants.py` and by visual verification: launch the app, confirm each image's caption matches the character shown.
-- **PyInstaller miss**: verify the bundled `dist/TurtleRace.exe` shows the images, not a missing-file error.
+- **PyInstaller miss**: verify the bundled `dist/ReptileRace.exe` shows the images, not a missing-file error.
 - **Tk image GC**: if images don't render but no error is raised, that's almost always lost references — confirm `dialog._bet_images` is held for the dialog's lifetime.

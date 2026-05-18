@@ -4,7 +4,7 @@
 
 **Goal:** Replace the four colored name buttons in the bet dialog with a 2x2 grid of TMNT character images and name captions.
 
-**Architecture:** Add a name-keyed image-path map and a size constant to `constants.py`. Rewrite `get_user_input()` in `main.py` to lay out four image+caption buttons via `tkinter.grid()`, loading JPGs through `PIL.Image` + `ImageTk.PhotoImage`. Update `turtle_race.spec` so PyInstaller bundles the `assets/` directory.
+**Architecture:** Add a name-keyed image-path map and a size constant to `constants.py`. Rewrite `get_user_input()` in `main.py` to lay out four image+caption buttons via `tkinter.grid()`, loading JPGs through `PIL.Image` + `ImageTk.PhotoImage`. Update `reptile_race.spec` so PyInstaller bundles the `assets/` directory.
 
 **Tech Stack:** Python 3, tkinter, Pillow (PIL), PyInstaller.
 
@@ -16,7 +16,7 @@
 
 - **Modify:** `constants.py` — add `TURTLE_IMAGES` (name → path) and `BET_IMAGE_SIZE`.
 - **Modify:** `main.py` — rewrite `get_user_input()` to a 2x2 image-button grid.
-- **Modify:** `turtle_race.spec` — bundle `assets/*.jpg`.
+- **Modify:** `reptile_race.spec` — bundle `assets/*.jpg`.
 - **Create:** `tests/test_constants.py` — unit-test the image map for completeness, ordering match, and file existence.
 
 The project has no existing test suite. We add a single small test file for the parts that are headlessly testable (the constants mapping). The Tk dialog itself is verified by manual launch.
@@ -221,11 +221,11 @@ git commit -m "Replace bet dialog buttons with 2x2 TMNT image grid"
 ### Task 4: Bundle assets in PyInstaller spec
 
 **Files:**
-- Modify: `turtle_race.spec:7`
+- Modify: `reptile_race.spec:7`
 
 - [ ] **Step 1: Update the `datas` line**
 
-In `turtle_race.spec`, change line 7 from:
+In `reptile_race.spec`, change line 7 from:
 
 ```python
     datas=[('lawn.jpg', '.')],
@@ -239,20 +239,20 @@ to:
 
 - [ ] **Step 2: Rebuild the executable**
 
-Run: `python -m PyInstaller turtle_race.spec --noconfirm`
+Run: `python -m PyInstaller reptile_race.spec --noconfirm`
 
-Expected: Build completes without errors. `dist/TurtleRace.exe` (or `dist/TurtleRace/`) exists.
+Expected: Build completes without errors. `dist/ReptileRace.exe` (or `dist/ReptileRace/`) exists.
 
 - [ ] **Step 3: Run the bundled exe and verify images render**
 
-Launch: `dist\TurtleRace.exe` (Windows) — open the bet dialog and confirm all four turtle images display.
+Launch: `dist\ReptileRace.exe` (Windows) — open the bet dialog and confirm all four turtle images display.
 
 If the dialog appears with empty buttons or throws "file not found" for an asset, the bundling didn't include the JPGs — re-check the `datas` glob and the build output for `assets/` files in the bundle.
 
 - [ ] **Step 4: Commit**
 
 ```
-git add turtle_race.spec
+git add reptile_race.spec
 git commit -m "Bundle assets/ JPGs in PyInstaller build"
 ```
 

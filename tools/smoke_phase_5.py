@@ -46,7 +46,7 @@ import tempfile
 
 def main():
     # ---- Step 1: env redirect BEFORE any paths/leaderboard import ----
-    tmpdir = tempfile.mkdtemp(prefix="turtlerace_phase5_smoke_")
+    tmpdir = tempfile.mkdtemp(prefix="reptilerace_phase5_smoke_")
     os.environ["APPDATA"] = tmpdir
     print(f"[smoke] redirected %APPDATA% to {tmpdir}")
 

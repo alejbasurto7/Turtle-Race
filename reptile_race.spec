@@ -1,4 +1,4 @@
-# Note: %APPDATA%/TurtleRace/leaderboard.json is generated at runtime by
+# Note: %APPDATA%/ReptileRace/leaderboard.json is generated at runtime by
 # leaderboard.py — it is NOT a bundled resource and does NOT belong in datas=.
 
 block_cipher = None
@@ -24,7 +24,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='TurtleRace',
+    name='ReptileRace',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

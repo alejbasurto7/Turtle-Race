@@ -26,7 +26,7 @@ import tempfile
 def main():
     # Redirect %APPDATA% so the smoke run cannot pollute the real per-user
     # data dir. Must happen BEFORE any import that resolves paths.user_data_path.
-    tmpdir = tempfile.mkdtemp(prefix="turtlerace_smoke_")
+    tmpdir = tempfile.mkdtemp(prefix="reptilerace_smoke_")
     os.environ["APPDATA"] = tmpdir
     print(f"[smoke] redirected %APPDATA% to {tmpdir}")
 
