@@ -412,7 +412,7 @@ def show_leaderboard() -> None:
     dialog = tkinter.Toplevel()
     dialog.title("Leaderboard")
     dialog.resizable(True, True)
-    dialog.geometry("520x420")
+    dialog.geometry("640x420")
 
     # --- Row 0: filter frame ---
     filter_frame = tkinter.Frame(dialog)
