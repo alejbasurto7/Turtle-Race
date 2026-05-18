@@ -7,7 +7,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets/lawn.jpg', 'assets'), ('assets/*.mid', 'assets'), ('assets/midi/*.mid', 'assets/midi'), ('assets/snakes/*.png', 'assets/snakes'), ('assets/tracks/*.png', 'assets/tracks'), ('assets/turtles/*.jpg', 'assets/turtles')],
+    datas=[('assets/lawn.jpg', 'assets'), ('assets/midi/*.mid', 'assets/midi'), ('assets/snakes/*.png', 'assets/snakes'), ('assets/tracks/*.png', 'assets/tracks'), ('assets/turtles/*.jpg', 'assets/turtles')],
     hiddenimports=['turtle'],
     hookspath=[],
     runtime_hooks=[],
