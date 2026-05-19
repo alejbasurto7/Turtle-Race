@@ -69,9 +69,9 @@ def random_color():
 
 def announce_result(winner, bet):
     if winner.pencolor() == turtles[bet - 1]['o'].pencolor():
-        print(f"You won! The {winner.pencolor()} 🐢 is the winner!")
+        print(f"You won! The {winner.pencolor()} turtle is the winner!")
     else:
-        print(f"You lose. The {winner.pencolor()} 🐢 is the winner.")
+        print(f"You lose. The {winner.pencolor()} turtle is the winner.")
 
 
 def celebrate(winner):
