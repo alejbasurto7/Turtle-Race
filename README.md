@@ -16,6 +16,14 @@ Built on the standard-library `turtle` module, `tkinter` dialogs, and `pygame.mi
 - **Main menu loop:** race round after round, browse the leaderboard, or quit cleanly — no need to restart the app.
 - **PyInstaller-friendly:** all asset paths resolve through a single helper so the frozen exe finds everything bundled inside it.
 
+## Download & Play (no Python required)
+
+Grab the latest `ReptileRace.exe` from the [Releases page](https://github.com/alejbasurto7/Reptile-Race/releases/latest) and double-click it — no install, no Python, no `pip`. Heads-up before you run it:
+
+- **Windows SmartScreen will warn you.** Because the exe isn't code-signed, Windows shows a blue "Windows protected your PC" screen on first launch. Click **More info** → **Run anyway** to start the game.
+- **Some antivirus tools may flag it.** PyInstaller-packaged Python apps are a common false-positive. If your AV quarantines the file, you'll need to allow/whitelist it manually.
+- **Windows x64 only.** This is a 64-bit Windows binary — it won't run on macOS, Linux, or 32-bit Windows. (Mac/Linux folks can run it from source — see below.)
+
 ## Run from source
 
 Requires Python 3.10+ with the standard-library `tkinter` and `turtle` modules (shipped with the official python.org installer on Windows).
